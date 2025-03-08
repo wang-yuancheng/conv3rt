@@ -5,4 +5,6 @@ export interface FileRecord {
   type: string;
   created_at: string;
   url: string;
+  user_id: string;
+  storage_path: string;
 }
