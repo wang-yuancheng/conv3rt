@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, File, AlertCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = [
@@ -61,14 +61,23 @@ export const FileUpload: React.FC = () => {
     try {
       setUploading(true);
       setProgress(0);
+      setError('');
 
-      // Upload file to Supabase Storage
+      // Get the authenticated user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        throw new Error('Please sign in to upload files');
+      }
+
+      // Create a unique filename with user ID prefix
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).slice(2)}.${fileExt}`;
+      const uniqueId = Math.random().toString(36).slice(2);
+      const storagePath = `${user.id}/${uniqueId}.${fileExt}`;
       
+      // Upload file to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('files')
-        .upload(fileName, file, {
+        .from(STORAGE_BUCKET)
+        .upload(storagePath, file, {
           onUploadProgress: (progress) => {
             const percentage = (progress.loaded / progress.total) * 100;
             setProgress(Math.round(percentage));
@@ -77,10 +86,10 @@ export const FileUpload: React.FC = () => {
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
+      // Get public URL for the uploaded file
       const { data: { publicUrl } } = supabase.storage
-        .from('files')
-        .getPublicUrl(fileName);
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(storagePath);
 
       // Store metadata in database
       const { error: dbError } = await supabase
@@ -89,7 +98,9 @@ export const FileUpload: React.FC = () => {
           filename: file.name,
           size: file.size,
           type: file.type,
-          url: publicUrl
+          url: publicUrl,
+          user_id: user.id,
+          storage_path: storagePath // Store the complete storage path
         });
 
       if (dbError) throw dbError;
@@ -100,7 +111,8 @@ export const FileUpload: React.FC = () => {
         fileInputRef.current.value = '';
       }
     } catch (err) {
-      setError('Failed to upload file. Please try again.');
+      console.error('Upload error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to upload file. Please try again.');
     } finally {
       setUploading(false);
     }
