@@ -4,12 +4,8 @@ import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'text/plain',
-  'image/jpeg',
-  'image/png'
+  'application/vnd.ms-excel', // .xls
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // .xlsx
 ];
 
 interface UploadProgressProps {
@@ -39,7 +35,7 @@ export const FileUpload: React.FC = () => {
       return false;
     }
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setError('File type not supported');
+      setError('Only Excel files (.xls, .xlsx) are supported');
       return false;
     }
     return true;
@@ -100,7 +96,7 @@ export const FileUpload: React.FC = () => {
           type: file.type,
           url: publicUrl,
           user_id: user.id,
-          storage_path: storagePath // Store the complete storage path
+          storage_path: storagePath
         });
 
       if (dbError) throw dbError;
@@ -131,7 +127,7 @@ export const FileUpload: React.FC = () => {
               <span className="font-semibold">Click to upload</span> or drag and drop
             </p>
             <p className="text-xs text-gray-500">
-              Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG (Max 10MB)
+              Excel files only (.xls, .xlsx) • Max 10MB
             </p>
           </div>
           <input
@@ -140,7 +136,7 @@ export const FileUpload: React.FC = () => {
             type="file"
             className="hidden"
             onChange={handleFileChange}
-            accept=".pdf,.doc,.docx,.txt,.jpg,.png"
+            accept=".xlsx,.xls"
           />
         </label>
       </div>

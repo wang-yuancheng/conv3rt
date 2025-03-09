@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { FileText, Download, Trash2, AlertCircle } from 'lucide-react';
+import { FileText, Download, Trash2, AlertCircle, PencilLine } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 import type { FileRecord } from '../types/files';
 
@@ -9,6 +10,7 @@ export const FileList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloadError, setDownloadError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchFiles = async () => {
     try {
@@ -39,15 +41,13 @@ export const FileList: React.FC = () => {
         throw new Error('Invalid storage path');
       }
 
-      // First, get a signed URL for the file
       const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from(STORAGE_BUCKET)
-        .createSignedUrl(file.storage_path, 60); // URL valid for 60 seconds
+        .createSignedUrl(file.storage_path, 60);
 
       if (signedUrlError) throw signedUrlError;
       if (!signedUrlData?.signedUrl) throw new Error('Failed to generate download URL');
 
-      // Fetch the file using the signed URL
       const response = await fetch(signedUrlData.signedUrl);
       if (!response.ok) throw new Error('Failed to download file');
 
@@ -72,14 +72,12 @@ export const FileList: React.FC = () => {
         throw new Error('Invalid storage path');
       }
 
-      // Delete from storage
       const { error: storageError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .remove([file.storage_path]);
 
       if (storageError) throw storageError;
 
-      // Delete from database
       const { error: dbError } = await supabase
         .from('files')
         .delete()
@@ -88,11 +86,15 @@ export const FileList: React.FC = () => {
       if (dbError) throw dbError;
 
       setFiles(files.filter(f => f.id !== id));
-      setDownloadError(null); // Clear any previous download errors
+      setDownloadError(null);
     } catch (err) {
       console.error('Error deleting file:', err);
       setError('Failed to delete file');
     }
+  };
+
+  const handleEdit = (fileId: string) => {
+    navigate(`/edit/${fileId}`);
   };
 
   useEffect(() => {
@@ -143,6 +145,13 @@ export const FileList: React.FC = () => {
                 </div>
               </div>
               <div className="flex space-x-2">
+                <button
+                  onClick={() => handleEdit(file.id)}
+                  className="p-2 text-blue-600 hover:text-blue-900 rounded-full hover:bg-blue-50 transition-colors"
+                  title="Edit file"
+                >
+                  <PencilLine className="w-5 h-5" />
+                </button>
                 <button
                   onClick={() => handleDownload(file)}
                   className="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors"

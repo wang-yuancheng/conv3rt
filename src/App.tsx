@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { FileUpload } from './components/FileUpload';
 import { FileList } from './components/FileList';
+import { FileEdit } from './components/FileEdit';
 import { Auth } from './components/Auth';
 import { supabase } from './lib/supabase';
 import { LogOut } from 'lucide-react';
@@ -10,13 +12,11 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check current auth status
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -37,33 +37,41 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">File Upload System</h1>
-          {user && (
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900"
-            >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
-          )}
-        </div>
-        
-        <div className="flex flex-col items-center">
-          {user ? (
-            <>
-              <FileUpload />
-              <FileList />
-            </>
-          ) : (
-            <Auth />
-          )}
+    <Router>
+      <div className="min-h-screen bg-gray-100 py-8 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">File Upload System</h1>
+            {user && (
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-gray-900"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            )}
+          </div>
+          
+          <div className="flex flex-col items-center">
+            {user ? (
+              <Routes>
+                <Route path="/" element={
+                  <>
+                    <FileUpload />
+                    <FileList />
+                  </>
+                } />
+                <Route path="/edit/:fileId" element={<FileEdit />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            ) : (
+              <Auth />
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Router>
   );
 }
 
