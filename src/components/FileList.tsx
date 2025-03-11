@@ -5,8 +5,12 @@ import { useNavigate } from 'react-router-dom';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 import type { FileRecord } from '../types/files';
 
-export const FileList: React.FC = () => {
-  const [files, setFiles] = useState<FileRecord[]>([]);
+interface FileListProps {
+  files: FileRecord[];
+  setFiles: React.Dispatch<React.SetStateAction<FileRecord[]>>;
+}
+
+export const FileList: React.FC<FileListProps> = ({ files, setFiles }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloadError, setDownloadError] = useState<string | null>(null);
