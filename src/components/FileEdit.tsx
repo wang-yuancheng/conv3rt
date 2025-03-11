@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertCircle, Table as TableIcon, Save, X } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Table as TableIcon, Save, X, Play } from 'lucide-react';
 import { read, utils, Range } from 'xlsx';
 import * as ExcelJS from 'exceljs';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
@@ -67,6 +67,8 @@ export const FileEdit: React.FC = () => {
   const [editingCell, setEditingCell] = useState<{ sheetIndex: number; row: number; col: number } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [processSuccess, setProcessSuccess] = useState(false);
 
   useEffect(() => {
     const fetchFileAndParse = async () => {
@@ -261,6 +263,50 @@ export const FileEdit: React.FC = () => {
     setEditValue('');
   };
 
+  const handleProcess = async () => {
+    try {
+      setProcessing(true);
+      setProcessSuccess(false);
+      setError(null);
+
+      // Prepare the data from all worksheets
+      const excelData = worksheets.map(sheet => ({
+        name: sheet.name,
+        data: sheet.data.map(row => 
+          row.map(cell => ({
+            value: cell.value,
+            style: cell.style
+          }))
+        )
+      }));
+
+      // Using POST /products/add endpoint which accepts POST requests
+      const response = await fetch('https://dummyjson.com/products/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: file?.filename,
+          data: excelData
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to process file');
+      const data = await response.json();
+      
+      if (!data) throw new Error('No response from server');
+
+      setProcessSuccess(true);
+      setTimeout(() => setProcessSuccess(false), 3000); // Hide success message after 3 seconds
+    } catch (err) {
+      console.error('Processing error:', err);
+      setError('Failed to process file. Please try again.');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const getCellStyle = (cell: CellData): React.CSSProperties => {
     if (cell.isHidden) return { display: 'none' };
 
@@ -328,10 +374,24 @@ export const FileEdit: React.FC = () => {
               <div key={sheet.name} className="border rounded-lg overflow-hidden">
                 <div className="bg-gray-50 p-4 border-b flex items-center gap-2">
                   <TableIcon className="w-5 h-5 text-gray-500" />
-                  <h2 className="text-lg font-semibold">
+                  <h2 className="text-lg font-semibold flex-1">
                     Sheet: {sheet.name}
                   </h2>
+                  <button
+                    onClick={handleProcess}
+                    disabled={processing}
+                    className="flex items-center gap-2 px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-green-300 transition-colors"
+                  >
+                    <Play className="w-4 h-4" />
+                    {processing ? 'Processing...' : 'Process'}
+                  </button>
                 </div>
+                {processSuccess && (
+                  <div className="bg-green-100 text-green-700 px-4 py-2 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" />
+                    File processed successfully!
+                  </div>
+                )}
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <tbody>
@@ -406,13 +466,13 @@ export const FileEdit: React.FC = () => {
 
         <div className="border-t pt-6">
           <h2 className="text-lg font-semibold mb-4">File Details</h2>
-          <dl className="grid grid-cols-2 gap-4">
+          <dl className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2">
             <dt className="text-gray-600">Size</dt>
-            <dd>{(file.size / 1024).toFixed(1)} KB</dd>
+            <dd className="truncate">{(file.size / 1024).toFixed(1)} KB</dd>
             <dt className="text-gray-600">Type</dt>
-            <dd>{file.type}</dd>
+            <dd className="truncate">{file.type}</dd>
             <dt className="text-gray-600">Uploaded</dt>
-            <dd>{new Date(file.created_at).toLocaleString()}</dd>
+            <dd className="truncate">{new Date(file.created_at).toLocaleString()}</dd>
           </dl>
         </div>
       </div>
