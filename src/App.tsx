@@ -10,6 +10,7 @@ import { LogOut } from 'lucide-react';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [files, setFiles] = useState<FileRecord[]>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -23,6 +24,10 @@ function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleFileUploaded = (newFile: FileRecord) => {
+    setFiles(prevFiles => [newFile, ...prevFiles]);
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -58,8 +63,8 @@ function App() {
               <Routes>
                 <Route path="/" element={
                   <>
-                    <FileUpload />
-                    <FileList />
+                    <FileUpload onFileUploaded={handleFileUploaded} />
+                    <FileList files={files} setFiles={setFiles} />
                   </>
                 } />
                 <Route path="/edit/:fileId" element={<FileEdit />} />

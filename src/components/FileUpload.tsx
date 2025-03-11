@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, File, AlertCircle } from 'lucide-react';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
+import type { FileRecord } from '../types/files';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = [
@@ -21,7 +22,11 @@ const UploadProgress: React.FC<UploadProgressProps> = ({ progress }) => (
   </div>
 );
 
-export const FileUpload: React.FC = () => {
+interface FileUploadProps {
+  onFileUploaded?: (file: FileRecord) => void;
+}
+
+export const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string>('');
   const [uploading, setUploading] = useState(false);
@@ -86,20 +91,28 @@ export const FileUpload: React.FC = () => {
       const { data: { publicUrl } } = supabase.storage
         .from(STORAGE_BUCKET)
         .getPublicUrl(storagePath);
+      
+      const fileData = {
+        filename: file.name,
+        size: file.size,
+        type: file.type,
+        url: publicUrl,
+        user_id: user.id,
+        storage_path: storagePath
+      };
 
       // Store metadata in database
-      const { error: dbError } = await supabase
+      const { data: insertedFile, error: dbError } = await supabase
         .from('files')
-        .insert({
-          filename: file.name,
-          size: file.size,
-          type: file.type,
-          url: publicUrl,
-          user_id: user.id,
-          storage_path: storagePath
-        });
+        .insert(fileData)
+        .select()
+        .single();
 
       if (dbError) throw dbError;
+
+      if (insertedFile && onFileUploaded) {
+        onFileUploaded(insertedFile);
+      }
 
       setSuccess(true);
       setFile(null);

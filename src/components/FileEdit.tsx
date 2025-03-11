@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertCircle, Table as TableIcon } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Table as TableIcon, Save, X } from 'lucide-react';
 import { read, utils, Range } from 'xlsx';
+import * as ExcelJS from 'exceljs';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 import type { FileRecord } from '../types/files';
 
@@ -63,6 +64,9 @@ export const FileEdit: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [worksheets, setWorksheets] = useState<WorksheetData[]>([]);
   const [parsingFile, setParsingFile] = useState(false);
+  const [editingCell, setEditingCell] = useState<{ sheetIndex: number; row: number; col: number } | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetchFileAndParse = async () => {
@@ -189,6 +193,74 @@ export const FileEdit: React.FC = () => {
     }
   };
 
+  const handleCellClick = (sheetIndex: number, row: number, col: number, value: string | number | null) => {
+    setEditingCell({ sheetIndex, row, col });
+    setEditValue(value?.toString() || '');
+  };
+
+  const handleCellEdit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditValue(e.target.value);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingCell || !file) return;
+
+    try {
+      setSaving(true);
+      const { sheetIndex, row, col } = editingCell;
+
+      // Get the file from storage
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .createSignedUrl(file.storage_path, 60);
+
+      if (signedUrlError) throw signedUrlError;
+      if (!signedUrlData?.signedUrl) throw new Error('Failed to generate download URL');
+
+      // Download and modify the file
+      const response = await fetch(signedUrlData.signedUrl);
+      if (!response.ok) throw new Error('Failed to download file');
+
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+
+      const worksheet = workbook.worksheets[sheetIndex];
+      if (!worksheet) throw new Error('Worksheet not found');
+
+      const cell = worksheet.getCell(row + 1, col + 1);
+      const numValue = Number(editValue);
+      cell.value = isNaN(numValue) ? editValue : numValue;
+
+      // Convert to blob
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: file.type });
+
+      // Upload modified file
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .update(file.storage_path, blob);
+
+      if (uploadError) throw uploadError;
+
+      // Update the UI
+      const newWorksheets = [...worksheets];
+      newWorksheets[sheetIndex].data[row][col].value = isNaN(numValue) ? editValue : numValue;
+      setWorksheets(newWorksheets);
+      setEditingCell(null);
+    } catch (err) {
+      console.error('Error saving changes:', err);
+      setError('Failed to save changes. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCell(null);
+    setEditValue('');
+  };
+
   const getCellStyle = (cell: CellData): React.CSSProperties => {
     if (cell.isHidden) return { display: 'none' };
 
@@ -271,9 +343,51 @@ export const FileEdit: React.FC = () => {
                               style={getCellStyle(cell)}
                               rowSpan={cell.rowSpan}
                               colSpan={cell.colSpan}
-                              className="text-sm border"
+                              className={`text-sm border relative ${
+                                editingCell?.sheetIndex === sheetIndex &&
+                                editingCell?.row === rowIndex &&
+                                editingCell?.col === colIndex
+                                  ? 'p-0'
+                                  : 'p-2 cursor-pointer hover:bg-blue-50'
+                              }`}
+                              onClick={() =>
+                                !editingCell &&
+                                handleCellClick(sheetIndex, rowIndex, colIndex, cell.value)
+                              }
                             >
-                              {cell.value?.toString() || ''}
+                              {editingCell?.sheetIndex === sheetIndex &&
+                              editingCell?.row === rowIndex &&
+                              editingCell?.col === colIndex ? (
+                                <div className="flex">
+                                  <input
+                                    type="text"
+                                    value={editValue}
+                                    onChange={handleCellEdit}
+                                    className="flex-1 p-2 border-none focus:ring-2 focus:ring-blue-500"
+                                    autoFocus
+                                  />
+                                  <div className="flex items-center border-l">
+                                    <button
+                                      onClick={handleSaveEdit}
+                                      disabled={saving}
+                                      className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50"
+                                      title="Save"
+                                    >
+                                      <Save className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={handleCancelEdit}
+                                      disabled={saving}
+                                      className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                                      title="Cancel"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                cell.value?.toString() || ''
+                              )}
                             </td>
                           ))}
                         </tr>
