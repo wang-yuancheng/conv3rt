@@ -280,8 +280,8 @@ export const FileEdit: React.FC = () => {
         )
       }));
 
-      // Using POST /products/add endpoint which accepts POST requests
-      const response = await fetch('https://dummyjson.com/products/add', {
+      // Call our backend API instead of the external endpoint directly
+      const response = await fetch('http://localhost:3000/api/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
