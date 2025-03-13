@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
+import ExcelJS from 'exceljs';
 import { JigsawStack } from "jigsawstack";
 
 const app = express();
@@ -17,8 +18,36 @@ app.use(express.json());
 app.post('/api/process', async (req, res) => {
   try {
     const { title, data } = req.body;
+
+    // Extract and process Excel data
+    const excelData = data.map(sheet => {
+      const sheetData = {
+        name: sheet.name,
+        content: [],
+        headers: []
+      };
+
+      // Extract headers from first row if it exists
+      if (sheet.data.length > 0) {
+        sheetData.headers = sheet.data[0].map(cell => cell.value?.toString() || '');
+      }
+
+      // Extract content from remaining rows
+      for (let i = 1; i < sheet.data.length; i++) {
+        const row = {};
+        sheet.data[i].forEach((cell, index) => {
+          const header = sheetData.headers[index] || `Column${index + 1}`;
+          row[header] = cell.value;
+        });
+        sheetData.content.push(row);
+      }
+
+      return sheetData;
+    });
+
+    console.log('Processed Excel Data:', JSON.stringify(excelData, null, 2));
     
-    let result = await jigsawstack.prompt_engine.create({
+    const result = await jigsawstack.prompt_engine.create({
     prompt: "Tell me a story about {about}",
     inputs: [
     {
@@ -29,13 +58,6 @@ app.post('/api/process', async (req, res) => {
     ],
     return_prompt: "Return the result in a markdown format",
     prompt_guard: ["sexual_content", "defamation"],
-    });
-
-    result = await jigsawstack.prompt_engine.run({
-    id: result.prompt_engine_id,
-    input_values: {
-    about: "Leaning Tower of Pisa",
-    },
     });
 
     res.json(result);
