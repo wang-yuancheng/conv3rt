@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertCircle, Table as TableIcon, Save, X, Play } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Table as TableIcon, Save, X, Play, LayoutTemplate } from 'lucide-react';
 import { read, utils, Range } from 'xlsx';
 import * as ExcelJS from 'exceljs';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
@@ -263,6 +263,159 @@ export const FileEdit: React.FC = () => {
     setEditValue('');
   };
 
+  const handleRemoveFirstRows = async () => {
+    if (!file) return;
+
+    const headerMappings = {
+      'Account': 'Account Description',
+      'Debit - Year to date': 'Debit Amount',
+      'Credit - Year to date': 'Credit Amount'
+    };
+
+    try {
+      setSaving(true);
+      setError('');
+
+      // Get the file from storage
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .createSignedUrl(file.storage_path, 60);
+
+      if (signedUrlError) throw signedUrlError;
+      if (!signedUrlData?.signedUrl) throw new Error('Failed to generate download URL');
+
+      // Download and modify the file
+      const response = await fetch(signedUrlData.signedUrl);
+      if (!response.ok) throw new Error('Failed to download file');
+
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+
+      // Remove first 4 rows from each worksheet
+      workbook.worksheets.forEach(worksheet => {
+        worksheet.spliceRows(1, 4);
+
+        // Insert three new columns after Account Type (which will be in position 4 after reordering)
+        worksheet.spliceColumns(5, 0, [], [], []); // Insert 3 empty columns
+        
+        // Set headers for the new columns
+        const headerRow = worksheet.getRow(1);
+        headerRow.getCell(5).value = 'Primary Classification';
+        headerRow.getCell(6).value = 'Secondary Classification';
+        headerRow.getCell(7).value = 'Tertiary Classification';
+
+        // Get the last column number
+        const lastCol = worksheet.lastColumn?.number || 0;
+        if (lastCol > 0) {
+          // Delete the last column
+          worksheet.spliceColumns(lastCol, 1);
+        }
+        
+        // Update headers in the first row (previously 5th row)
+        worksheet.getRow(1).eachCell((cell, colNumber) => {
+          const currentValue = cell.value?.toString() || '';
+          if (headerMappings[currentValue]) {
+            cell.value = headerMappings[currentValue];
+          }
+        });
+
+        // Move column 2 to position 4
+        const tempCol = worksheet.getColumn(2);
+        const tempValues = tempCol.values;
+        const tempStyles = [];
+
+        // Store styles for each cell in column 2
+        tempCol.eachCell((cell, rowNumber) => {
+          tempStyles[rowNumber] = {
+            style: cell.style,
+            alignment: cell.alignment,
+            border: cell.border,
+            fill: cell.fill,
+            font: cell.font
+          };
+        });
+
+        // Shift columns 3 and 4 one position left
+        for (let row = 1; row <= worksheet.rowCount; row++) {
+          const cell3 = worksheet.getCell(row, 3);
+          const cell4 = worksheet.getCell(row, 4);
+          
+          worksheet.getCell(row, 2).value = cell3.value;
+          worksheet.getCell(row, 2).style = cell3.style;
+          
+          worksheet.getCell(row, 3).value = cell4.value;
+          worksheet.getCell(row, 3).style = cell4.style;
+        }
+
+        // Place column 2 values in position 4
+        for (let row = 1; row <= worksheet.rowCount; row++) {
+          const cell = worksheet.getCell(row, 4);
+          cell.value = tempValues[row];
+          if (tempStyles[row]) {
+            Object.assign(cell, tempStyles[row]);
+          }
+        }
+      });
+
+      // Convert to blob
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: file.type });
+
+      // Upload modified file
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .update(file.storage_path, blob);
+
+      if (uploadError) throw uploadError;
+
+      // Update the UI
+      const newWorksheets = worksheets.map(sheet => ({
+        ...sheet,
+        data: sheet.data.slice(4).map((row, rowIndex) => {
+          // Remove the last column from each row
+          const rowWithoutLastCol = row.slice(0, -1);
+          
+          // Reorder columns and add new columns in the UI data
+          const reorderedRow = [...rowWithoutLastCol];
+          const col2 = reorderedRow[1];
+          reorderedRow[1] = reorderedRow[2];
+          reorderedRow[2] = reorderedRow[3];
+          reorderedRow[3] = col2;
+
+          // Add three new columns after Account Type with headers in first row
+          if (rowIndex === 0) {
+            reorderedRow.splice(4, 0, 
+              { value: 'Primary Classification', style: {} },
+              { value: 'Secondary Classification', style: {} },
+              { value: 'Tertiary Classification', style: {} }
+            );
+          } else {
+            reorderedRow.splice(4, 0, 
+              { value: '', style: {} },
+              { value: '', style: {} },
+              { value: '', style: {} }
+            );
+          }
+
+          if (rowIndex === 0) {
+            return reorderedRow.map(cell => ({
+              ...cell,
+              value: headerMappings[cell.value?.toString() || ''] || cell.value
+            }));
+          }
+          return reorderedRow;
+        })
+      }));
+      setWorksheets(newWorksheets);
+    } catch (err) {
+      console.error('Error removing rows:', err);
+      setError('Failed to remove rows. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleProcess = async () => {
     try {
       setProcessing(true);
@@ -377,6 +530,14 @@ export const FileEdit: React.FC = () => {
                   <h2 className="text-lg font-semibold flex-1">
                     Sheet: {sheet.name}
                   </h2>
+                  <button
+                    onClick={handleRemoveFirstRows}
+                    disabled={saving}
+                    className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors mr-2"
+                  >
+                    <LayoutTemplate className="w-4 h-4" />
+                    {saving ? 'Reformatting...' : 'Reformat Structure'}
+                  </button>
                   <button
                     onClick={handleProcess}
                     disabled={processing}
