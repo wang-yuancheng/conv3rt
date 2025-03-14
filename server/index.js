@@ -13,30 +13,58 @@ const port = 3000;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+// Store extracted data
+let extractedData = [];
+
 // Process Excel data
 app.post('/api/process', async (req, res) => {
   try {
+    // Extract values from first and fourth columns
+    extractedData = [];
+    const { data } = req.body;
+
+    if (!Array.isArray(data)) {
+      throw new Error('Invalid data format');
+    }
+
+    data.forEach((sheet) => {
+      if (!Array.isArray(sheet.data)) {
+        return;
+      }
+
+      // Skip the first row (headers) and process remaining rows
+      for (let i = 1; i < sheet.data.length; i++) {
+        const row = sheet.data[i];
+        if (row && row.length >= 4) {
+          extractedData.push({
+            firstColumn: row[0]?.value || '',
+            fourthColumn: row[3]?.value || ''
+          });
+        }
+      }
+    });
+    
     let result = await jigsawstack.prompt_engine.create({
-      prompt: "{question}" + "ABC company",
+      prompt: "{question} You are given the following data:" + extractedData + "For each object in this array, identify whether they are an asset, liability or equity. In your response, you must only return a raw, unformatted JSON string, without new lines or whitespaces, where it is an array of JSON objects, and each JSON object must have a key called ‘type’, and a value of 'asset', 'liability' or 'equity'.",
       inputs: [
         {
            key: "question",
            optional: false,
-           initial_value: "Identify the name of the company that this data is from.",
+           initial_value: " ",
         },
       ],
-      return_prompt: "Return the result in a JSON format with a single key named output",
+      return_prompt: " ",
       prompt_guard: ["sexual_content", "defamation"],
     });
  
     result = await jigsawstack.prompt_engine.run({
       id: result.prompt_engine_id,
       input_values: {
-        question: "Identify the name of the company that this data is from.",
+        question: " ",
       },
     });
- 
-    res.json(result);
+
+    res.json({ success: true, data: result });
   } catch (error) {
     console.error('Error processing data:', error);
     res.status(500).json({ error: 'Failed to process data' });

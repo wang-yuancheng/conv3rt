@@ -443,12 +443,7 @@ export const FileEdit: React.FC = () => {
       // Prepare the data from all worksheets
       const excelData = worksheets.map(sheet => ({
         name: sheet.name,
-        data: sheet.data.map(row => 
-          row.map(cell => ({
-            value: cell.value,
-            style: cell.style
-          }))
-        )
+        data: sheet.data
       }));
 
       // Using POST /products/add endpoint which accepts POST requests
@@ -457,10 +452,7 @@ export const FileEdit: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          title: file?.filename,
-          data: excelData
-        })
+        body: JSON.stringify({ data: excelData })
       });
 
       if (!response.ok) throw new Error('Failed to process file');
