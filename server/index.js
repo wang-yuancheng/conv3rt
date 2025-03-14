@@ -25,7 +25,7 @@ app.post('/api/process', async (req, res) => {
            initial_value: "Identify the name of the company that this data is from.",
         },
       ],
-      return_prompt: "Return the result in a JSON format",
+      return_prompt: "Return the result in a JSON format with a single key named output",
       prompt_guard: ["sexual_content", "defamation"],
     });
  
