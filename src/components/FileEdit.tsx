@@ -296,6 +296,15 @@ export const FileEdit: React.FC = () => {
       workbook.worksheets.forEach(worksheet => {
         worksheet.spliceRows(1, 4);
 
+        // Remove rows where first column is empty (from bottom to top to avoid index issues)
+        for (let row = worksheet.rowCount; row >= 1; row--) {
+          const cell = worksheet.getCell(row, 1);
+          const value = cell.text || cell.value;
+          if (!value || value.toString().trim() === '') {
+            worksheet.spliceRows(row, 1);
+          }
+        }
+
         // Insert three new columns after Account Type (which will be in position 4 after reordering)
         worksheet.spliceColumns(5, 0, [], [], []); // Insert 3 empty columns
         
@@ -372,7 +381,16 @@ export const FileEdit: React.FC = () => {
       // Update the UI
       const newWorksheets = worksheets.map(sheet => ({
         ...sheet,
-        data: sheet.data.slice(4).map((row, rowIndex) => {
+        data: sheet.data
+          // Filter out rows where first column is empty
+          .slice(4)
+          .filter(row => {
+            const firstCellValue = row[0].value;
+            return firstCellValue !== null && 
+                   firstCellValue !== undefined && 
+                   firstCellValue.toString().trim() !== '';
+          })
+          .map((row, rowIndex) => {
           // Remove the last column from each row
           const rowWithoutLastCol = row.slice(0, -1);
           
