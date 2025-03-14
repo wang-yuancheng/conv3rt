@@ -43,28 +43,30 @@ app.post('/api/process', async (req, res) => {
         }
       }
     });
+
+    console.log(JSON.stringify(extractedData, null, 2))
     
     let result = await jigsawstack.prompt_engine.create({
-      prompt: "{question} You are given the following data:" + extractedData + "For each object in this array, identify whether they are an asset, liability or equity. In your response, you must only return a raw, unformatted JSON string, without new lines or whitespaces, where it is an array of JSON objects, and each JSON object must have a key called ‘type’, and a value of 'asset', 'liability' or 'equity'.",
+      prompt: "{context} You are given the following data:" + extractedData + "For each object in this array, deduce whether it is 1. 'Asset' 2. 'Liability' 3. 'Equity' 4. 'Revenue/Income' or 5. 'Cost/Expense'.",
       inputs: [
         {
-           key: "question",
+           key: "context",
            optional: false,
-           initial_value: " ",
+           initial_value: "You are a professional accountant.",
         },
       ],
-      return_prompt: " ",
+      return_prompt: "In your response, you must only return a raw, unformatted JSON string, without new lines or whitespaces, where it is also an array of JSON objects, and each JSON object must have a key called ‘Account Type’, and a value based on the most relevant classification choice.",
       prompt_guard: ["sexual_content", "defamation"],
     });
  
     result = await jigsawstack.prompt_engine.run({
       id: result.prompt_engine_id,
       input_values: {
-        question: " ",
+        context: "You are a professional accountant.",
       },
     });
 
-    res.json({ success: true, data: result });
+    res.json(result.result);
   } catch (error) {
     console.error('Error processing data:', error);
     res.status(500).json({ error: 'Failed to process data' });
