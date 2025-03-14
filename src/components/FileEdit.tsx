@@ -280,7 +280,7 @@ export const FileEdit: React.FC = () => {
         )
       }));
 
-      // Call our backend API instead of the external endpoint directly
+      // Using POST /products/add endpoint which accepts POST requests
       const response = await fetch('http://localhost:3000/api/process', {
         method: 'POST',
         headers: {
@@ -288,7 +288,7 @@ export const FileEdit: React.FC = () => {
         },
         body: JSON.stringify({
           title: file?.filename,
-          data: excelData,
+          data: excelData
         })
       });
 
