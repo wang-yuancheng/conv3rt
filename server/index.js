@@ -45,21 +45,28 @@ app.post('/api/process', async (req, res) => {
       return sheetData;
     });
 
-    console.log('Processed Excel Data:', JSON.stringify(excelData, null, 2));
+    const processed_excel_data = JSON.stringify(excelData, null, 2);
     
-    const result = await jigsawstack.prompt_engine.create({
-    prompt: "Tell me a story about {about}",
-    inputs: [
-    {
-    key: "about",
-    optional: false,
-    initial_value: "Leaning Tower of Pisa",
-    },
-    ],
-    return_prompt: "Return the result in a markdown format",
-    prompt_guard: ["sexual_content", "defamation"],
+    let result = await jigsawstack.prompt_engine.create({
+      prompt: "{question}" + "ABC company",
+      inputs: [
+        {
+           key: "question",
+           optional: false,
+           initial_value: "Identify the name of the company that this data is from.",
+        },
+      ],
+      return_prompt: "Return the result in a JSON format",
+      prompt_guard: ["sexual_content", "defamation"],
     });
-
+ 
+    result = await jigsawstack.prompt_engine.run({
+      id: result.prompt_engine_id,
+      input_values: {
+        question: "Identify the name of the company that this data is from.",
+      },
+    });
+ 
     res.json(result);
   } catch (error) {
     console.error('Server error:', error);

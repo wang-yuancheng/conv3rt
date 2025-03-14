@@ -288,7 +288,7 @@ export const FileEdit: React.FC = () => {
         },
         body: JSON.stringify({
           title: file?.filename,
-          data: excelData
+          data: excelData,
         })
       });
 
