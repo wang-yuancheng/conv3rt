@@ -68,6 +68,7 @@ export const FileEdit: React.FC = () => {
   const [editValue, setEditValue] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [hasReformatted, setHasReformatted] = useState<boolean>(false);
   const [processSuccess, setProcessSuccess] = useState(false);
 
   useEffect(() => {
@@ -87,6 +88,7 @@ export const FileEdit: React.FC = () => {
         if (!data) throw new Error('File not found');
 
         setFile(data);
+        setHasReformatted(data.reformatted);
         await parseExcelFile(data);
       } catch (err) {
         console.error('Error fetching file:', err);
@@ -291,6 +293,18 @@ export const FileEdit: React.FC = () => {
     try {
       setSaving(true);
       setError('');
+      setHasReformatted(true);
+      
+      // Update the reformatted status in the database
+      const { error: updateError } = await supabase
+        .from('files')
+        .update({ 
+          reformatted: true,
+          reformatted_at: new Date().toISOString()
+        })
+        .eq('id', file.id);
+
+      if (updateError) throw updateError;
 
       // Get the file from storage
       const { data: signedUrlData, error: signedUrlError } = await supabase.storage
@@ -579,11 +593,11 @@ export const FileEdit: React.FC = () => {
                   </h2>
                   <button
                     onClick={handleRemoveFirstRows}
-                    disabled={saving}
+                    disabled={saving || hasReformatted}
                     className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors mr-2"
                   >
                     <LayoutTemplate className="w-4 h-4" />
-                    {saving ? 'Reformatting...' : 'Reformat Structure'}
+                    {saving ? 'Reformatting...' : 'Reformat'}
                   </button>
                   <button
                     onClick={handleProcess}
