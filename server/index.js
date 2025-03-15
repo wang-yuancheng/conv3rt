@@ -36,10 +36,9 @@ app.post('/api/process', async (req, res) => {
       for (let i = 1; i < sheet.data.length; i++) {
         const row = sheet.data[i];
         if (row && row.length >= 4) {
-          extractedData.push({
-            firstColumn: row[0]?.value || '',
-            fourthColumn: row[3]?.value || ''
-          });
+          const firstValue = row[0]?.value || '';
+          const fourthValue = row[3]?.value || '';
+          extractedData.push(`${firstValue} ${fourthValue}`.trim());
         }
       }
     });
@@ -47,7 +46,7 @@ app.post('/api/process', async (req, res) => {
     console.log(JSON.stringify(extractedData, null, 2))
     
     let result = await jigsawstack.prompt_engine.create({
-      prompt: "{context} You are given the following data:" + extractedData + "For each object in this array, deduce whether it is 1. 'Asset' 2. 'Liability' 3. 'Equity' 4. 'Revenue/Income' or 5. 'Cost/Expense'.",
+      prompt: "{context} You are given the following data:" + extractedData + "For each string in this array, deduce whether it represents 1. 'Asset' 2. 'Liability' 3. 'Equity' 4. 'Revenue/Income' or 5. 'Cost/Expense'.",
       inputs: [
         {
            key: "context",
