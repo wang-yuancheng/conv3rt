@@ -125,13 +125,29 @@ export const FileEdit: React.FC = () => {
   const processMerges = (worksheet: any, merges: Range[] | undefined): CellData[][] => {
     const range = utils.decode_range(worksheet['!ref'] || 'A1');
     const data: CellData[][] = [];
+    const nonEmptyColumns = new Set<number>();
 
     // Initialize the data array
     for (let r = 0; r <= range.e.r; ++r) {
       data[r] = [];
       for (let c = 0; c <= range.e.c; ++c) {
         const address = utils.encode_cell({ r, c });
-        data[r][c] = processCell(worksheet, address);
+        const cell = processCell(worksheet, address);
+        data[r][c] = cell;
+        
+        // Track non-empty columns
+        if (cell.value !== null && cell.value !== undefined && cell.value.toString().trim() !== '') {
+          nonEmptyColumns.add(c);
+        }
+      }
+    }
+
+    // Mark cells in empty columns as hidden
+    for (let r = 0; r <= range.e.r; ++r) {
+      for (let c = 0; c <= range.e.c; ++c) {
+        if (!nonEmptyColumns.has(c)) {
+          data[r][c].isHidden = true;
+        }
       }
     }
 
@@ -295,18 +311,9 @@ export const FileEdit: React.FC = () => {
       // Remove first 4 rows from each worksheet
       workbook.worksheets.forEach(worksheet => {
         worksheet.spliceRows(1, 4);
-
-        // Remove rows where first column is empty (from bottom to top to avoid index issues)
-        for (let row = worksheet.rowCount; row >= 1; row--) {
-          const cell = worksheet.getCell(row, 1);
-          const value = cell.text || cell.value;
-          if (!value || value.toString().trim() === '') {
-            worksheet.spliceRows(row, 1);
-          }
-        }
-
+        
         // Insert three new columns after Account Type (which will be in position 4 after reordering)
-        worksheet.spliceColumns(5, 0, [], [], []); // Insert 3 empty columns
+        worksheet.spliceColumns(5, 0, [], [], []);
         
         // Set headers for the new columns
         const headerRow = worksheet.getRow(1);
@@ -365,6 +372,36 @@ export const FileEdit: React.FC = () => {
             Object.assign(cell, tempStyles[row]);
           }
         }
+
+        // Remove rows where first column is empty (from bottom to top to avoid index issues)
+        let hasNonEmptyValues = new Array(worksheet.columnCount).fill(false);
+
+        // First pass: identify non-empty columns
+        for (let row = 1; row <= worksheet.rowCount; row++) {
+          for (let col = 1; col <= worksheet.columnCount; col++) {
+            const cell = worksheet.getCell(row, col);
+            const value = cell.text || cell.value;
+            if (value && value.toString().trim() !== '') {
+              hasNonEmptyValues[col - 1] = true;
+            }
+          }
+        }
+
+        // Remove empty columns from right to left
+        for (let col = worksheet.columnCount; col >= 1; col--) {
+          if (!hasNonEmptyValues[col - 1]) {
+            worksheet.spliceColumns(col, 1);
+          }
+        }
+
+        // Then remove empty rows
+        for (let row = worksheet.rowCount; row >= 1; row--) {
+          const cell = worksheet.getCell(row, 1);
+          const value = cell.text || cell.value;
+          if (!value || value.toString().trim() === '') {
+            worksheet.spliceRows(row, 1);
+          }
+        }
       });
 
       // Convert to blob
@@ -382,14 +419,7 @@ export const FileEdit: React.FC = () => {
       const newWorksheets = worksheets.map(sheet => ({
         ...sheet,
         data: sheet.data
-          // Filter out rows where first column is empty
           .slice(4)
-          .filter(row => {
-            const firstCellValue = row[0].value;
-            return firstCellValue !== null && 
-                   firstCellValue !== undefined && 
-                   firstCellValue.toString().trim() !== '';
-          })
           .map((row, rowIndex) => {
           // Remove the last column from each row
           const rowWithoutLastCol = row.slice(0, -1);
@@ -424,6 +454,13 @@ export const FileEdit: React.FC = () => {
           }
           return reorderedRow;
         })
+          // Filter out rows where first column is empty
+          .filter(row => {
+            const firstCellValue = row[0].value;
+            return firstCellValue !== null && 
+                   firstCellValue !== undefined && 
+                   firstCellValue.toString().trim() !== '';
+          })
       }));
       setWorksheets(newWorksheets);
     } catch (err) {
@@ -566,7 +603,12 @@ export const FileEdit: React.FC = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <tbody>
-                      {sheet.data.map((row, rowIndex) => (
+                      {sheet.data.map((row, rowIndex) => {
+                        // Check if row has any visible cells
+                        const hasVisibleCells = row.some(cell => !cell.isHidden);
+                        if (!hasVisibleCells) return null;
+                        
+                        return (
                         <tr key={`${sheetIndex}-row-${rowIndex}`}>
                           {row.map((cell, colIndex) => !cell.isHidden && (
                             <td
@@ -622,7 +664,7 @@ export const FileEdit: React.FC = () => {
                             </td>
                           ))}
                         </tr>
-                      ))}
+                      )})}
                     </tbody>
                   </table>
                 </div>

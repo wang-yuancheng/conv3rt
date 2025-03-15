@@ -5,7 +5,7 @@ import { FileList } from './components/FileList';
 import { FileEdit } from './components/FileEdit';
 import { Auth } from './components/Auth';
 import { supabase } from './lib/supabase';
-import { LogOut } from 'lucide-react';
+import { LogOut, FileSpreadsheet } from 'lucide-react';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -46,7 +46,12 @@ function App() {
       <div className="min-h-screen bg-gray-100 py-8 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">File Upload System</h1>
+            <div className="flex items-center gap-3">
+              <FileSpreadsheet className="w-8 h-8 text-blue-600" />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                conv3rt
+              </h1>
+            </div>
             {user && (
               <button
                 onClick={handleSignOut}
