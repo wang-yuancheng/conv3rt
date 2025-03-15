@@ -71,6 +71,20 @@ export const FileEdit: React.FC = () => {
   const [hasReformatted, setHasReformatted] = useState<boolean>(false);
   const [processSuccess, setProcessSuccess] = useState(false);
 
+  const fillColumnWithValues = (columnNumber: number, values: string[]) => {
+    if (!worksheets.length) return;
+    
+    const newWorksheets = [...worksheets];
+    values.forEach((value, index) => {
+      // Skip header row (index 0) and start filling from row 1
+      const rowIndex = index + 1;
+      if (rowIndex < newWorksheets[0].data.length) {
+        newWorksheets[0].data[rowIndex][columnNumber].value = value;
+      }
+    });
+    setWorksheets(newWorksheets);
+  };
+
   useEffect(() => {
     const fetchFileAndParse = async () => {
       try {
@@ -514,7 +528,8 @@ export const FileEdit: React.FC = () => {
       setProcessSuccess(true);
       setTimeout(() => setProcessSuccess(false), 3000); // Hide success message after 3 seconds
 
-      console.log(data.split(","));
+      const accountTypeArray = data.split(",");
+      fillColumnWithValues(3, accountTypeArray);
     } catch (err) {
       console.error('Processing error:', err);
       setError('Failed to process file. Please try again.');
