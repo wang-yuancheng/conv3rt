@@ -513,6 +513,8 @@ export const FileEdit: React.FC = () => {
 
       setProcessSuccess(true);
       setTimeout(() => setProcessSuccess(false), 3000); // Hide success message after 3 seconds
+
+      console.log(data.split(","));
     } catch (err) {
       console.error('Processing error:', err);
       setError('Failed to process file. Please try again.');

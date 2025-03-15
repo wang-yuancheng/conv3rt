@@ -46,22 +46,22 @@ app.post('/api/process', async (req, res) => {
     console.log(JSON.stringify(extractedData, null, 2))
     
     let result = await jigsawstack.prompt_engine.create({
-      prompt: "{context} You are given the following data:" + extractedData + "For each string in this array, deduce whether it represents 1. 'Asset' 2. 'Liability' 3. 'Equity' 4. 'Revenue/Income' or 5. 'Cost/Expense'.",
+      prompt: "{context} You are given the following data:" + extractedData + "For each string in this array, map it to either 'Asset' or 'Liability' or 'Equity' or 'Revenue/Income' or 'Cost/Expense'. Every single string should be replaced, do not skip any string.",
       inputs: [
         {
            key: "context",
            optional: false,
-           initial_value: "You are a professional accountant.",
+           initial_value: "You are a professional accountant, everything you do must be accurate.",
         },
       ],
-      return_prompt: "In your response, you must only return a raw, unformatted JSON string, without new lines or whitespaces, where it is also an array of JSON objects, and each JSON object must have a key called ‘Account Type’, and a value based on the most relevant classification choice.",
+      return_prompt: "In your response, you must only return a string. It should be comma separated.",
       prompt_guard: ["sexual_content", "defamation"],
     });
  
     result = await jigsawstack.prompt_engine.run({
       id: result.prompt_engine_id,
       input_values: {
-        context: "You are a professional accountant.",
+        context: "You are a professional accountant, everything you do must be accurate.",
       },
     });
 
