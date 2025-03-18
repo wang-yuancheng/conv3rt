@@ -44,7 +44,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-100 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
               <FileSpreadsheet className="w-8 h-8 text-blue-600" />

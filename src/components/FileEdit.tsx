@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Loader2, AlertCircle, Table as TableIcon, Save, X, Play, LayoutTemplate } from 'lucide-react';
-import { read, utils, Range } from 'xlsx';
 import * as ExcelJS from 'exceljs';
-import { supabase, STORAGE_BUCKET } from '../lib/supabase';
+import { AlertCircle, ArrowLeft, LayoutTemplate, Loader2, Play, Save, Table as TableIcon, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Range, read, utils } from 'xlsx';
+import { STORAGE_BUCKET, supabase } from '../lib/supabase';
 import type { FileRecord } from '../types/files';
 
 interface CellStyle {
@@ -71,18 +71,104 @@ export const FileEdit: React.FC = () => {
   const [hasReformatted, setHasReformatted] = useState<boolean>(false);
   const [processSuccess, setProcessSuccess] = useState(false);
 
-  const fillColumnWithValues = (columnNumber: number, values: string[]) => {
-    if (!worksheets.length) return;
+  const loadProcessedData = async (fileData: FileRecord) => {
+    if (!fileData.processed_data || !Array.isArray(fileData.processed_data)) return;
     
-    const newWorksheets = [...worksheets];
-    values.forEach((value, index) => {
-      // Skip header row (index 0) and start filling from row 1
-      const rowIndex = index + 1;
-      if (rowIndex < newWorksheets[0].data.length) {
-        newWorksheets[0].data[rowIndex][columnNumber].value = value;
-      }
-    });
-    setWorksheets(newWorksheets);
+    try {
+      const data = fileData.processed_data;
+      
+      // Map the classifications to their respective columns
+      // Classifications start at column 4 (index 4)
+      const classifications = data.map(row => ({
+        accountType: row[0] || '',
+        primary: row[1] || '',
+        secondary: row[2] || '',
+        tertiary: row[3] || ''
+      }));
+
+      // Update each classification column
+      await Promise.all([        
+        fillColumnWithValues(4, classifications.map(c => c.primary)),        // Primary (column 5)
+        fillColumnWithValues(5, classifications.map(c => c.secondary)),      // Secondary (column 6)
+        fillColumnWithValues(6, classifications.map(c => c.tertiary))        // Tertiary (column 7)
+      ]);
+    } catch (err) {
+      console.error('Error loading processed data:', err);
+      setError('Failed to load processed data');
+    }
+  };
+
+  const fillColumnWithValues = async (columnNumber: number, values: string[]) => {
+    if (!worksheets.length) return;
+    if (!file) return;
+    if (!values.length) return;
+
+    try {
+      setSaving(true);
+
+      // Get the file from storage
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .createSignedUrl(file.storage_path, 60);
+
+      if (signedUrlError) throw signedUrlError;
+      if (!signedUrlData?.signedUrl) throw new Error('Failed to generate download URL');
+
+      // Download and modify the file
+      const response = await fetch(signedUrlData.signedUrl);
+      if (!response.ok) throw new Error('Failed to download file');
+
+      const arrayBuffer = await response.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+
+      // Update the Excel file
+      const worksheet = workbook.worksheets[0];
+      if (!worksheet) throw new Error('Worksheet not found');
+
+      values.forEach((value, index) => {
+        // Skip header row (index 0) and start filling from row 1
+        const rowIndex = index + 1;
+        if (rowIndex <= worksheet.rowCount) {
+          const cell = worksheet.getCell(rowIndex + 1, columnNumber + 1);
+          cell.value = value;
+        }
+      });
+
+      // Convert to blob and upload
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: file.type });
+
+      // Upload modified file
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .update(file.storage_path, blob);
+
+      if (uploadError) throw uploadError;
+    
+      // Update the UI
+      const newWorksheets = [...worksheets];
+      values.forEach((value, index) => {
+        // Skip header row (index + 1 since we want to start from row 2)
+        const rowIndex = index + 1;
+        if (rowIndex < newWorksheets[0].data.length) {
+          // Ensure the row and column exist before updating
+          if (!newWorksheets[0].data[rowIndex]) {
+            newWorksheets[0].data[rowIndex] = [];
+          }
+          if (!newWorksheets[0].data[rowIndex][columnNumber]) {
+            newWorksheets[0].data[rowIndex][columnNumber] = { value: null, style: {} };
+          }
+          newWorksheets[0].data[rowIndex][columnNumber].value = value;
+        }
+      });
+      setWorksheets(newWorksheets);
+    } catch (err) {
+      console.error('Error filling column:', err);
+      setError('Failed to update column values. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -104,6 +190,11 @@ export const FileEdit: React.FC = () => {
         setFile(data);
         setHasReformatted(data.reformatted);
         await parseExcelFile(data);
+        
+        // Load processed data after parsing the file
+        if (data.processed_data) {
+          await loadProcessedData(data);
+        }
       } catch (err) {
         console.error('Error fetching file:', err);
         setError(err instanceof Error ? err.message : 'Failed to load file');
@@ -402,7 +493,7 @@ export const FileEdit: React.FC = () => {
         }
 
         // Remove rows where first column is empty (from bottom to top to avoid index issues)
-        let hasNonEmptyValues = new Array(worksheet.columnCount).fill(false);
+        const hasNonEmptyValues = new Array(worksheet.columnCount).fill(false);
 
         // First pass: identify non-empty columns
         for (let row = 1; row <= worksheet.rowCount; row++) {
@@ -502,6 +593,7 @@ export const FileEdit: React.FC = () => {
   const handleProcess = async () => {
     try {
       setProcessing(true);
+      setSaving(true);
       setProcessSuccess(false);
       setError(null);
 
@@ -521,26 +613,86 @@ export const FileEdit: React.FC = () => {
       });
 
       if (!response.ok) throw new Error('Failed to process file');
-      const data = await response.json();
+      const processedData = await response.json();
       
-      if (!data) throw new Error('No response from server');
+      if (!Array.isArray(processedData) || processedData.length === 0) throw new Error('Invalid response from server');
+
+      // Process each row of classifications
+      const promises = [];
+      
+      // Map the classifications to their respective columns (0-based indices)
+      const classifications = processedData.map(row => ({
+        accountType: row[0] || '',
+        primary: row[1] || '',
+        secondary: row[2] || '',
+        tertiary: row[3] || ''
+      }));
+
+      // Update each classification column
+      promises.push(fillColumnWithValues(4, classifications.map(c => c.primary)));        // Primary (column 5)
+      promises.push(fillColumnWithValues(5, classifications.map(c => c.secondary)));      // Secondary (column 6)
+      promises.push(fillColumnWithValues(6, classifications.map(c => c.tertiary)));       // Tertiary (column 7)
+
+      // Wait for all columns to be updated
+      await Promise.all(promises);
+
+      // Get the latest version of the file from storage
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .createSignedUrl(file.storage_path, 60);
+
+      if (signedUrlError) throw signedUrlError;
+      if (!signedUrlData?.signedUrl) throw new Error('Failed to generate download URL');
+
+      // Download the current file
+      const fileResponse = await fetch(signedUrlData.signedUrl);
+      if (!fileResponse.ok) throw new Error('Failed to download file');
+
+      const arrayBuffer = await fileResponse.arrayBuffer();
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(arrayBuffer);
+
+      // Convert to blob
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: file.type });
+
+      // Upload modified file back to storage
+      const { error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .update(file.storage_path, blob);
+
+      if (uploadError) throw uploadError;
+
+      // Update processed status in database
+      if (file) {
+        const { error: updateError } = await supabase
+          .from('files')
+          .update({ 
+            processed_at: new Date().toISOString(),
+            processed_data: processedData,
+            last_modified: new Date().toISOString()
+          })
+          .eq('id', file.id);
+
+        if (updateError) throw updateError;
+      }
 
       setProcessSuccess(true);
       setTimeout(() => setProcessSuccess(false), 3000); // Hide success message after 3 seconds
-
-      const accountTypeArray = data.split(",");
-      fillColumnWithValues(3, accountTypeArray);
     } catch (err) {
       console.error('Processing error:', err);
       setError('Failed to process file. Please try again.');
     } finally {
       setProcessing(false);
+      setSaving(false);
     }
   };
 
   const getCellStyle = (cell: CellData): React.CSSProperties => {
     if (cell.isHidden) return { display: 'none' };
 
+    const minWidth = cell.value?.toString().length || 0;
+    
     return {
       textAlign: cell.style?.alignment as 'left' | 'center' | 'right' | undefined,
       fontWeight: cell.style?.isBold ? 'bold' : undefined,
@@ -551,6 +703,11 @@ export const FileEdit: React.FC = () => {
       borderBottom: cell.style?.border?.bottom,
       borderLeft: cell.style?.border?.left,
       padding: '0.5rem 1rem',
+      minWidth: `${Math.max(minWidth * 8, 120)}px`,
+      maxWidth: '400px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     };
   };
 
@@ -581,7 +738,7 @@ export const FileEdit: React.FC = () => {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="w-full max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => navigate('/')}
@@ -633,34 +790,53 @@ export const FileEdit: React.FC = () => {
                 )}
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
+                    <thead className="sticky top-0 bg-white shadow-sm z-10">
+                      <tr>
+                        {sheet.data[0]?.map((cell, colIndex) => !cell.isHidden && (
+                          <th
+                            key={`${sheetIndex}-header-${colIndex}`}
+                            style={{
+                              ...getCellStyle(cell),
+                              fontWeight: 'bold',
+                              backgroundColor: '#ffffff',
+                              borderBottom: '2px solid #e5e7eb'
+                            }}
+                            colSpan={cell.colSpan}
+                            className="text-sm p-3"
+                          >
+                            {cell.value?.toString() || ''}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
                     <tbody>
-                      {sheet.data.map((row, rowIndex) => {
+                      {sheet.data.slice(1).map((row, rowIndex) => {
                         // Check if row has any visible cells
                         const hasVisibleCells = row.some(cell => !cell.isHidden);
                         if (!hasVisibleCells) return null;
                         
                         return (
-                        <tr key={`${sheetIndex}-row-${rowIndex}`}>
+                        <tr key={`${sheetIndex}-row-${rowIndex + 1}`}>
                           {row.map((cell, colIndex) => !cell.isHidden && (
                             <td
-                              key={`${sheetIndex}-${rowIndex}-${colIndex}`}
+                              key={`${sheetIndex}-${rowIndex + 1}-${colIndex}`}
                               style={getCellStyle(cell)}
                               rowSpan={cell.rowSpan}
                               colSpan={cell.colSpan}
                               className={`text-sm border relative ${
                                 editingCell?.sheetIndex === sheetIndex &&
-                                editingCell?.row === rowIndex &&
+                                editingCell?.row === rowIndex + 1 &&
                                 editingCell?.col === colIndex
                                   ? 'p-0'
                                   : 'p-2 cursor-pointer hover:bg-blue-50'
                               }`}
                               onClick={() =>
                                 !editingCell &&
-                                handleCellClick(sheetIndex, rowIndex, colIndex, cell.value)
+                                handleCellClick(sheetIndex, rowIndex + 1, colIndex, cell.value)
                               }
                             >
                               {editingCell?.sheetIndex === sheetIndex &&
-                              editingCell?.row === rowIndex &&
+                              editingCell?.row === rowIndex + 1 &&
                               editingCell?.col === colIndex ? (
                                 <div className="flex">
                                   <input
