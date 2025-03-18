@@ -1,23 +1,101 @@
-import express from 'express';
 import cors from 'cors';
-import { JigsawStack } from "jigsawstack";
+import * as dotenv from 'dotenv';
+import express from 'express';
+import fs from 'fs';
+import OpenAI from "openai";
+import path from 'path';
 
-const jigsawstack = JigsawStack({
-apiKey: "sk_f259a67a8f9a9abb344528d4c30045ba205954ea667ca68f72bfcb44ceb75d67feb45343a10acc8f4bb56c897ee27b1eeeee8d91ac26c7628a2815c680701cfb024A9aIy4oghSLBVF8mZf",
+const sample_response = `Revenue/Income, Revenue, Sales of trading goods, Wholesale Trade - Others  
+Revenue/Income, Other Income, Other Income  
+Cost/Expense, Cost of Sales, Cost of Sales for Merchandise Trade, Purchases For Merchandise Trade - Wholesale Merchandise - Others  
+Cost/Expense, Other Expenses, Other Expenses  
+Liability, Trade and Other Payables, Trade and Other Payables, Bank Charges and Fees  
+Cost/Expense, Administration and Other Expenses, Professional Service Charges, Company Incorporation Expenses  
+Cost/Expense, Administration and Other Expenses, Directors' Remuneration and CPF Contributions, Directors' Remuneration - Full-time/part-time Staff (Net CPF)  
+Cost/Expense, Administration and Other Expenses, Directors' Remuneration and CPF Contributions, Directors' Remuneration - Employer CPF Expense  
+Cost/Expense, Administration and Other Expenses, Directors' Benefits in Kind, Directors' Remuneration - Benefits in Kind (Net CPF)  
+Cost/Expense, Administration and Other Expenses, Professional Service Charges, Accounting, Audit, Tax and Secretarial Expenses  
+Cost/Expense, Administration and Other Expenses, Depreciation Expense, Depreciation of Other Assets  
+Cost/Expense, Administration and Other Expenses, Directors' Remuneration and CPF Contributions, Directors' Remuneration - Employer CPF Expense  
+Cost/Expense, Administration and Other Expenses, Office Administration Expenses, Expensed Assets  
+Cost/Expense, Marketing and Distribution Expenses, Meal and Entertainment Expenses, Meal and Entertainment Expenses  
+Cost/Expense, Marketing and Distribution Expenses, Transportation Expenses, Freight Out Expenses  
+Cost/Expense, Administration and Other Expenses, IT And Communication , Other IT and Communication Expenses  
+Cost/Expense, Administration and Other Expenses, Professional Service Charges, Legal Expenses  
+Cost/Expense, Administration and Other Expenses, Other Staff Costs, Other Employee Benefits - Medical expenses and insurance (non-regulatory)  
+Cost/Expense, Administration and Other Expenses, Professional Service Charges, Other Professional Service Expenses  
+Cost/Expense, Administration and Other Expenses, Office Administration Expenses, Other Office Administration Expenses   
+Cost/Expense, Administration and Other Expenses, Office Administration Expenses, Printing Expenses  
+Cost/Expense, Administration and Other Expenses, Other Staff Costs, Administration Office Staff Cost - Skill Development Fund  
+Cost/Expense, Administration and Other Expenses, Other Staff Costs, Other Employee Benefits - Expenses associated gambling and game of chances  
+Cost/Expense, Administration and Other Expenses, Employee Benefit Expenses, Staff Remuneration and CPF Contributions  
+Cost/Expense, Marketing and Distribution Expenses, Transportation Expenses, Public Transport Expenses  
+Cost/Expense, Marketing and Distribution Expenses, Overseas Travels, Other Travel Expenses  
+Revenue/Income, Other Income, Foreign exchange Gain, Unrealised Foreign Exchange Gain  
+Revenue/Income, Other Income, Foreign exchange Gain, Unrealised Foreign Exchange Gain  
+Revenue/Income, Other Income, Foreign exchange Gain, Unrealised Foreign Exchange Gain  
+Revenue/Income, Other Income, Foreign exchange Gain, Realised Foreign Exchange Gain  
+Cost/Expense, Income Tax Expense, Corporate Income Taxes, Income Tax Expense  
+Asset, Cash and Cash Equivalents, Bank Balances, Bank Balances  
+Asset, Cash and Cash Equivalents, Bank Balances, Bank Balances  
+Asset, Cash and Cash Equivalents, Bank Balances, Bank Balances  
+Asset, Cash and Cash Equivalents, Bank Balances, Bank Balances  
+Asset, Cash and Cash Equivalents, Bank Balances, Bank Balances  
+Asset, Trade and Other Receivables, Trade Receivables, Trade Receivables  
+Asset, Other Current Assets, Accrued Assets, Deferred Expenses  
+Asset, Property, plant and equipment, Office Machine and Equipment, Office Equipment  
+Asset, Property, plant and equipment, Office Machine and Equipment, Office Equipment  
+Asset, Property, plant and equipment, Office Machine and Equipment, Computers and Applications  
+Asset, Property, plant and equipment, Office Machine and Equipment, Computers and Applications  
+Liability, Trade and Other Payables, Trade and Other Payables, Trade Payables  
+Liability, Loans and Borrowings, Other Loans Payable, Other Loan Payable  
+Liability, Other Current Liabilities, Tax Related Payables, Goods and Services Tax Payable  
+Liability, Contract Liabilities, Contract Liabilities, Contract Liabilities  
+Liability, Other Current Liabilities, Accrued Liabilities, Accrued Expenses  
+Liability, Income Tax Payable, Income Tax Payable, Corporate Tax Payable  
+Equity, Retained Profit or Loss, Retained Earnings, Profit and Loss For The Period  
+Equity, Issued Capital, Paid Up Capital, Paid Up Capital - Ordinary Shares`;
+// Load environment variables from the server .env file
+dotenv.config();
+
+// Read classifications from JSON file
+const classificationsPath = path.join(process.cwd(), 'server', 'classifications.json');
+
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+// Configure CORS
+app.use(cors({
+  origin: ['http://localhost:5173', 'https://localhost:5173'],
+  methods: ['POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json({ limit: '50mb' }));
 
 // Store extracted data
 let extractedData = [];
 
+function convertToJson(input) {
+  // Split the input into rows
+  const rows = input.split("\n");
+
+  // Convert each row into an array of values
+  const result = rows.map((row) => row.split(",").map((cell) => cell.trim()));
+
+  return result;
+}
+
 // Process Excel data
 app.post('/api/process', async (req, res) => {
+  res.json(convertToJson(sample_response));
+  return;
   try {
     // Extract values from first and fourth columns
     extractedData = [];
@@ -36,36 +114,35 @@ app.post('/api/process', async (req, res) => {
       for (let i = 1; i < sheet.data.length; i++) {
         const row = sheet.data[i];
         if (row && row.length >= 4) {
-          const firstValue = row[0]?.value || '';
-          const fourthValue = row[3]?.value || '';
-          extractedData.push(`${firstValue} ${fourthValue}`.trim());
+          const fourthValue = row[0]?.value || '';
+          extractedData.push(`${fourthValue}`.trim());
         }
       }
     });
 
-    console.log(JSON.stringify(extractedData, null, 2))
-    
-    let result = await jigsawstack.prompt_engine.create({
-      prompt: "{context} You are given the following data:" + extractedData + "For each string in this array, map it to either 'Asset' or 'Liability' or 'Equity' or 'Revenue/Income' or 'Cost/Expense'. Every single string should be replaced, do not skip any string.",
-      inputs: [
+    console.log("Extracted Data:", extractedData)
+    const classificationJSON = JSON.parse(
+      fs.readFileSync(classificationsPath, "utf8")
+    );
+    const response = await openai.chat.completions.create({
+      model: "gpt-4-turbo",
+      messages: [
         {
-           key: "context",
-           optional: false,
-           initial_value: "You are a professional accountant, everything you do must be accurate.",
+          role: "system",
+          content: "You are a professional accountant with expertise in financial statement classification. You have access to a comprehensive classification structure for trial balance entries. The structure is organized hierarchically as: {<account type>: {<primary classification>: {<secondary classification>: [<tertiary classification>]}}}.\n\nClassification Structure:\n" + JSON.stringify(classificationJSON, null, 2)
         },
+        {
+          role: "user",
+          content: `Using the provided classification structure , classify each entry into its account type, primary, secondary, and tertiary classification. Return a response of ONLY valid comma-separated (CSV) list of classifications (in the format <account type>, <primary classification>, <secondary classification>, <tertiary classification>), maintaining the exact order of the input. \n\nEntries to classify:\n${extractedData.join(",")}`
+        }
       ],
-      return_prompt: "In your response, you must only return a string. It should be comma separated.",
-      prompt_guard: ["sexual_content", "defamation"],
-    });
- 
-    result = await jigsawstack.prompt_engine.run({
-      id: result.prompt_engine_id,
-      input_values: {
-        context: "You are a professional accountant, everything you do must be accurate.",
-      },
+      temperature: 0.1,
+      max_tokens: 1500
     });
 
-    res.json(result.result);
+    const classifications = response.choices[0].message.content.trim();
+    console.log("OpenAI Response:", classifications);
+    res.json(convertToJson(classifications));
   } catch (error) {
     console.error('Error processing data:', error);
     res.status(500).json({ error: 'Failed to process data' });
@@ -74,5 +151,5 @@ app.post('/api/process', async (req, res) => {
 
 // Start server
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}\nAccepting requests from http://localhost:5173`);
 });
