@@ -5,12 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 import type { FileRecord } from '../types/files';
 
-interface FileListProps {
+interface FileListProps extends React.HTMLAttributes<HTMLDivElement> {
   files: FileRecord[];
   setFiles: React.Dispatch<React.SetStateAction<FileRecord[]>>;
+  category: 'excel' | 'pdf';
+  title: string;
 }
 
-export const FileList: React.FC<FileListProps> = ({ files, setFiles }) => {
+export const FileList: React.FC<FileListProps> = ({ files, setFiles, category, title, className = '' }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [downloadError, setDownloadError] = useState<string | null>(null);
@@ -25,6 +27,7 @@ export const FileList: React.FC<FileListProps> = ({ files, setFiles }) => {
         .from('files')
         .select('*')
         .eq('user_id', user.id)
+        .eq('category', category)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -119,8 +122,8 @@ export const FileList: React.FC<FileListProps> = ({ files, setFiles }) => {
   }
 
   return (
-    <div className="mt-8 w-full">
-      <h2 className="text-xl font-semibold mb-4">Uploaded Files</h2>
+    <div className={`mt-8 w-full ${className}`}>
+      <h2 className="text-xl font-semibold mb-4">{title}</h2>
       
       {downloadError && (
         <div className="mb-4 p-3 bg-red-100 rounded-lg flex items-center gap-2 text-red-700">
