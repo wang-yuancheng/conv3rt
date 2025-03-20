@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { FileSelection } from './components/FileSelection';
 import { FileUpload } from './components/FileUpload';
+import { PDFUpload } from './components/PDFUpload';
 import { FileList } from './components/FileList';
 import { FileEdit } from './components/FileEdit';
 import { Auth } from './components/Auth';
@@ -67,9 +69,30 @@ function App() {
             {user ? (
               <Routes>
                 <Route path="/" element={
+                  <FileSelection />
+                } />
+                <Route path="/upload-excel" element={
                   <>
                     <FileUpload onFileUploaded={handleFileUploaded} />
-                    <FileList files={files} setFiles={setFiles} />
+                    <FileList 
+                      files={files} 
+                      setFiles={setFiles} 
+                      category="excel"
+                      title="Excel Documents"
+                      className="border-t pt-8"
+                    />
+                  </>
+                } />
+                <Route path="/upload-pdf" element={
+                  <>
+                    <PDFUpload onFileUploaded={handleFileUploaded} />
+                    <FileList 
+                      files={files} 
+                      setFiles={setFiles} 
+                      category="pdf"
+                      title="PDF Documents"
+                      className="border-t pt-8"
+                    />
                   </>
                 } />
                 <Route path="/edit/:fileId" element={<FileEdit />} />
