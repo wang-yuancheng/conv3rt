@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { Upload, File, AlertCircle } from 'lucide-react';
+import { Upload, File, AlertCircle, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 import type { FileRecord } from '../types/files';
 
@@ -33,6 +34,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
   const [progress, setProgress] = useState(0);
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const validateFile = (file: File): boolean => {
     if (file.size > MAX_FILE_SIZE) {
@@ -98,7 +100,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
         type: file.type,
         url: publicUrl,
         user_id: user.id,
-        storage_path: storagePath
+        storage_path: storagePath,
+        category: 'excel'
       };
 
       // Store metadata in database
@@ -128,7 +131,18 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
   };
 
   return (
-    <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="mb-6">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to selection
+        </button>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex items-center justify-center w-full">
         <label
           htmlFor="file-upload"
@@ -191,6 +205,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
           File uploaded successfully!
         </div>
       )}
+    </div>
     </div>
   );
 };
