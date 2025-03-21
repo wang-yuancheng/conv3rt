@@ -1,0 +1,1171 @@
+{
+    "Asset": {
+        "Cash and Cash Equivalents": {
+            "Cash Balances": [
+                "Cash in Hand",
+                "Unbanked Cash Collections"
+            ],
+            "Bank Balances": [
+                "Bank Balances"
+            ],
+            "Payment Gateway Balances": [
+                "Payment Gateway Balances"
+            ],
+            "Cash Equivalents ": [
+                "Short Term Deposits",
+                "Other Cash Equivalents"
+            ]
+        },
+        "Trade and Other Receivables": {
+            "Trade Receivables": [
+                "Trade Receivables"
+            ],
+            "Allowance for Expected Credit Losses": [
+                "Allowance for Expected Credit Losses"
+            ],
+            "Trade Debits": [
+                "Trade Debits"
+            ],
+            "Deposit Receivables": [
+                "Deposit Receivables"
+            ],
+            "Non-Trade Receivables": [
+                "Other Non-Trade Receivables"
+            ],
+            "Loan Receivables": [
+                "Loan Receivable"
+            ],
+            "Other Receivable": [
+                "Other Receivable"
+            ],
+            "Share Subscription Receivables": [
+                "Share Subscription Receivables"
+            ]
+        },
+        "Contract Assets": {
+            "Contract Assets": [
+                "Contract Assets"
+            ]
+        },
+        "Inventories": {
+            "Materials for Production": [
+                "Packaging Materials",
+                "Work in Progress",
+                "Raw Materials ",
+                "Finished Goods",
+                "Components and Parts",
+                "Semi-Finished Goods"
+            ],
+            "Merchandise for Trading": [
+                "Wholesale Merchandise",
+                "Retail Merchandise"
+            ],
+            "Inventories in Transit ": [
+                "Inventories in Transit "
+            ],
+            "Other Inventories": [
+                "Other Inventories"
+            ],
+            "Provision for Impairment of Inventories": [
+                "Provision for Impairment of Inventories"
+            ]
+        },
+        "Derivative Financial Assets": {
+            "Derivative Financial Assets": [
+                "Options",
+                "Warrants",
+                "Swaps",
+                "Futures ",
+                "Other Derivative Financial Assets",
+                "Loan Commitments",
+                "Financial Guarantees"
+            ]
+        },
+        "Financial Assets at Fair Value Through Profit or Loss": {
+            "Financial Assets at Fair Value Through Profit or Loss": [
+                "Share Investments (Trading for Profit)",
+                "Bond Investments (Trading for Profit)",
+                "Other Investments (Trading for Profit)"
+            ]
+        },
+        "Biological Assets": {
+            "Biological Assets": [
+                "Agriculture And Livestock"
+            ]
+        },
+        "Other Current Assets": {
+            "Tax Related Receivables": [
+                "Goods and Services Tax Input",
+                "Other Tax Receivables",
+                "Goods and Services Tax Receivable",
+                "Corporate Tax Receivables"
+            ],
+            "Accrued Assets": [
+                "Deferred Expenses",
+                "Accrued Revenues"
+            ],
+            "Other Current Assets": [
+                "Other Current Assets"
+            ]
+        },
+        "Investments in Subsidiaries": {
+            "Investments in Subsidiaries": [
+                "Subsidiaries"
+            ]
+        },
+        "Investments Accounted for Using the Equity Method": {
+            "Investment in Associates and Joint Ventures": [
+                "Joint Ventures",
+                "Associates"
+            ]
+        },
+        "Financial Assets at Fair Value Through Other Comprehensive Income": {
+            "Financial Assets at Fair Value Through Other Comprehensive Income": [
+                "Other Investments ",
+                "Share Investments",
+                "Bond Investments"
+            ]
+        },
+        "Investment Properties": {
+            "Investment Properties": [
+                "Investment Properties",
+                "Investment Properties Under Construction"
+            ]
+        },
+        "Exploration and Evaluation Asset Investments": {
+            "Exploration and Evaluation Asset Investments": [
+                "Exploration and Evaluation Asset Investments"
+            ]
+        },
+        "Biological Asset Investments": {
+            "Biological Asset Investments": [
+                "Biological Asset Investments"
+            ]
+        },
+        "Property, plant and equipment": {
+            "Land Only": [
+                "Leasehold Land",
+                "Freehold Land "
+            ],
+            "Buildings and Structures": [
+                "Other Building and Structures",
+                "Offices",
+                "Production Facilities",
+                "Stores and Warehouses"
+            ],
+            "Office Machine and Equipment": [
+                "Office Equipment",
+                "Computers and Applications",
+                "Motor Vehicles",
+                "Other Office Machine and Equipment"
+            ],
+            "Furniture and Fixtures": [
+                "Furniture and Fixtures"
+            ],
+            "Renovation and Refurbishment": [
+                "Renovation and Refurbishment"
+            ],
+            "Industrial Machinery and Equipment": [
+                "Other Industrial Machines and Equipment",
+                "Production Machinery and Equipment",
+                "Sales Equipment"
+            ],
+            "Vehicles": [
+                "Transport Vehicles",
+                "Other Vehicles",
+                "Ships",
+                "Aircrafts",
+                "Delivery Equipment"
+            ],
+            "Exploration and Evaluation Assets - Own Usage": [
+                "Exploration and Evaluation Assets - Own Usage"
+            ],
+            "Biological Assets - Own Usage": [
+                "Biological Assets - Own Usage"
+            ],
+            "Assets under Construction Progress - Own Usage": [
+                "Assets under Construction Progress - Furniture and Fixtures",
+                "Assets under Construction Progress - Renovation and Refurbishment",
+                "Assets under Construction Progress - Industrial Machinery and Equipment",
+                "Assets under Construction Progress - Exploration and Evaluation Assets (Own Usage)",
+                "Assets under Construction Progress - Biological Assets (Own Usage)",
+                "Assets under Construction Progress - Others",
+                "Assets under Construction Progress - Office Machine and Equipment",
+                "Assets under Construction Progress - Buildings and Structures",
+                "Assets under Construction Progress - Vehicles"
+            ],
+            "Other Plant and Equipment - Own Usage": [
+                "Other Plant and Equipment"
+            ]
+        },
+        "Other Tangible Asset Investments": {
+            "Other Tangible Asset Investments": [
+                "Other Tangible Asset Investments"
+            ]
+        },
+        "Intangible Assets": {
+            "Intangible Assets": [
+                "Research and Development",
+                "Right-of-Use Assets",
+                "Goodwill",
+                "Licenses and Franchises",
+                "Trademarks",
+                "Software",
+                "Patents",
+                "Other Intangible Assets"
+            ]
+        },
+        "Deferred Tax Assets": {
+            "Deferred Tax Assets": [
+                "Deferred Tax Assets"
+            ]
+        },
+        "Other Non-Current Assets": {
+            "Other Non-Current Assets": [
+                "Other Financial Assets",
+                "Other Non-Current Assets"
+            ]
+        }
+    },
+    "Liability": {
+        "Trade and Other Payables": {
+            "Trade and Other Payables": [
+                "Non-Trade Payables",
+                "Other Payables",
+                "Dividend Payable",
+                "Trade Credits",
+                "Trade Payables",
+                "Deposit for Share Applications",
+                "Deposits Payable"
+            ]
+        },
+        "Contract Liabilities": {
+            "Contract Liabilities": [
+                "Contract Liabilities"
+            ]
+        },
+        "Loans and Borrowings": {
+            "Bank Loan": [
+                "Bank Loan"
+            ],
+            "Bridging Loan": [
+                "Bridging Loan"
+            ],
+            "Other Loans Payable": [
+                "Other Loan Payable"
+            ],
+            "Bank Overdraft": [
+                "Bank Overdraft"
+            ],
+            "Commercial Papers": [
+                "Commercial Papers"
+            ],
+            "Bonds": [
+                "Debentures - Unsecured Bonds",
+                "Notess - Secured Bonds"
+            ],
+            "Other Financial Liabilities ": [
+                "Other Financial Liabilities "
+            ]
+        },
+        "Lease Liabilities": {
+            "Right of Use Liabilities": [
+                "Gross Right of Use Liabilities",
+                "Deferred Right of Use Interest Expense "
+            ],
+            "Finance Lease Liabilities": [
+                "Deferred Finance Lease Interest Expense",
+                "Gross Finance Lease Liabilities"
+            ]
+        },
+        "Income Tax Payable": {
+            "Income Tax Payable": [
+                "Corporate Tax Payable",
+                "Corporate Tax Provision"
+            ]
+        },
+        "Provisions": {
+            "Provision for Interest Expenses": [
+                "Provision For Interest Expenses From Right of Use Liabilities",
+                "Provision For Other Interest Expenses",
+                "Provision For Interest Expenses From Bonds",
+                "Provision For Interest Expenses From Finance Lease Liabilities",
+                "Provision For Interest Expenses From Trade Transactions",
+                "Provision For Interest Expenses From Loans And Borrowings",
+                "Provision For Interest Expenses From Bank Overdraft",
+                "Provision For Interest Expenses From Commercial Papers"
+            ],
+            "Provision for Warranties": [
+                "Provision for Warranties"
+            ],
+            "Provision for Restructuring": [
+                "Provision for Restructuring"
+            ],
+            "Provision for Legal Claims": [
+                "Provision for Legal Claims"
+            ],
+            "Provision for Lease Make Good Provision": [
+                "Provision for Lease Make Good Provision"
+            ],
+            "Provision for Deferred Compensation": [
+                "Provision for Deferred Compensation"
+            ],
+            "Provisions for Other Liabilities ": [
+                "Provisions for Other Liabilities "
+            ]
+        },
+        "Employee Benefits": {
+            "Employment-Related Payables": [
+                "Directors' Fees Payable",
+                "Salary Payables",
+                "Other Employment Benefits",
+                "MOM Payable",
+                "CPF Payable"
+            ]
+        },
+        "Derivative Financial Liabilities": {
+            "Derivative Financial Liabilities": [
+                "Options",
+                "Warrants",
+                "Loan commitments",
+                "Swaps",
+                "Futures",
+                "Financial guarantees",
+                "Other derivative financial liabilities"
+            ]
+        },
+        "Other Current Liabilities": {
+            "Tax Related Payables": [
+                "Sales Tax Liabilities",
+                "Custom, Excise and Duties Liabilities",
+                "Other Tax Payables",
+                "Value Added Tax Liabilities"
+            ],
+            "Goods and Services Tax Liabilities": [
+                "Goods and Services Tax Payable",
+                "Goods and Services Tax Output"
+            ],
+            "Accrued Liabilities": [
+                "Accrued Expenses",
+                "Deferred Revenues"
+            ],
+            "Other payables": [
+                "Fines and Penalties Payable",
+                "Other Liabilities"
+            ]
+        },
+        "Deferred Tax Liabilities": {
+            "Deferred Tax Liabilities": [
+                "Deferred Tax Liabilities"
+            ]
+        }
+    },
+    "Equity": {
+        "Issued Capital": {
+            "Paid Up Capital": [
+                "Paid Up Capital - Preference Shares",
+                "Paid Up Capital - Ordinary Shares",
+                "Paid Up Capital - Other Shares"
+            ],
+            "Application Funds for Unissued Shares": [
+                "Application Funds for Unissued Shares"
+            ],
+            "Treasury Shares": [
+                "Treasury Shares - Preference Shares",
+                "Treasury Shares - Other Shares ",
+                "Treasury Shares - Ordinary Shares "
+            ]
+        },
+        "Reserves": {
+            "Revaluation Surplus Reserve": [
+                "Transfer Out of Revaluation Surplus For Disposed Property, Plant and Equipment To Retained Earnings (Non-Recycling)",
+                "Revaluation Surplus For Property, Plant and Equipment "
+            ],
+            "Financial Assets at Fair Value Through Other Comprehensive Income Reserve": [
+                "Change In Fair Value Of Financial Liability Attributable To Change In Credit Risk Of Liability - Futures (FVTPL)",
+                "Transfer Out for Fair Value Gain/Loss on Disposal of Share and Other Investments (FVOCI Non-Recycling)",
+                "Fair Value Gain/Loss for Bond Investments (FVOCI Recycling)",
+                "Change In Fair Value Of Financial Liability Attributable To Change In Credit Risk Of Liability - Swaps (FVTPL)",
+                "Fair Value Gain/Loss for Share and Other Investments (FVOCI Non-Recycling)",
+                "Transfer Out of Fair Value Gain/Loss on Disposal of Bond Investments (FVOCI Recycling)",
+                "Change In Fair Value Of Financial Liability Attributable To Change In Credit Risk Of Liability - Loan Commitments (FVTPL)",
+                "Change In Fair Value Of Financial Liability Attributable To Change In Credit Risk Of Liability - Warrants (FVTPL)",
+                "Change In Fair Value Of Other Financial Liability Attributable To Change In Credit Risk Of Liability (FVTPL)",
+                "Change In Fair Value Of Financial Liability Attributable To Change In Credit Risk Of Liability - Options (FVTPL)",
+                "Change In Fair Value Of Financial Liability Attributable To Change In Credit Risk Of Liability - Financial Guarantees (FVTPL)"
+            ],
+            "Hedging Reserve - Cash Flow Hedges": [
+                "Fair Value Gain/Loss for Ineffective Portion of Valuation of Hedging Instruments (FVOCI Non-Recycling)",
+                "Transfer Out for Fair Value Gain/Loss for Effective Portion of Valuation of Hedging Instruments (FVOCI Recycling)",
+                "Fair Value Gain/Loss for Effective Portion of Valuation of Hedging Instruments (FVOCI Recycling)",
+                "Transfer Out for Fair Value Gain/Loss for ineffective Portion of Valuation of Hedging Instruments (FVOCI Non-Recycling)"
+            ],
+            "Share Option Reserve": [
+                "Share Option Reserve"
+            ],
+            "Capital Reserve": [
+                "Capital Reserve"
+            ],
+            "Equity Component of Convertible Loan": [
+                "Equity Component of Convertible Loan"
+            ],
+            "Currency Translation Reserve": [
+                "Transfer Out of Translation Gain/Loss on Disposal of Subsidary",
+                "Translation Gain/Loss on Consolidation of Subsidiary"
+            ],
+            "Share-Based Payments Reserve": [
+                "Share-Based Payments Reserve"
+            ],
+            "Other Reserves": [
+                "Other Reserves"
+            ]
+        },
+        "Retained Profit or Loss": {
+            "Retained Earnings": [
+                "Dividends Declared",
+                "Prior Year Retained Earnings",
+                "Profit and Loss For The Period"
+            ],
+            "Transfers In from Reserves": [
+                "Transfer In of Fair Value Gain/Loss on Disposal of Share and Other Investments (FVOCI Non-Recycling)",
+                "Transfer In From Ineffective Portion of Hedging Reserves (FVOCI Non-Recycling)",
+                "Transfer In of Revaluation Surplus For Disposed Property Plant and Equipment (Non-Recycling)"
+            ]
+        },
+        "Other Comprehensive Income": {
+            "Other comprehensive income": [
+                "Change In Revaluation Surplus For Property, Plant and Equipment",
+                "Change in Fair Value for Share and Other Investments",
+                "Change In Fair Value Of Financial Liability Attributable To Change In Credit Risk Of Liability",
+                "Change in Fair Value for Effective Portion of Valuation of Hedging Instruments ",
+                "Change in Fair Value for Bond Investments ",
+                "Gain from Ineffective Portion of Valuation of Hedging Instruments "
+            ]
+        }
+    },
+    "Revenue/Income": {
+        "Revenue": {
+            "Sales of manufactured goods": [
+                "Producers of Goods - Other Goods Producers",
+                "Producers of Goods - Construction in Progress",
+                "Producers of Goods - Agriculture Produce",
+                "Producers of Goods - Manufactured Products",
+                "Producers of Goods - Minerals, Ores and Fuels"
+            ],
+            "Sales of trading goods": [
+                "Retail Trade - Others",
+                "Wholesale Trade - Others",
+                "Other Merchandise",
+                "Wholesale Trade - Handphones, Simcards and Off The Shelf Software",
+                "Retail Trade - Handphones, Simcards and Off The Shelf Software"
+            ],
+            "Services rendered": [
+                "Professional Services",
+                "ransportation",
+                "Food, Beverage and Catering ",
+                "Other Services",
+                "Logistics and Warehousing",
+                "Transportation"
+            ],
+            "Sales adjustments": [
+                "Adjustments to Sales - Discounts",
+                "Adjustments to Sales - Sales Returned",
+                "Adjustments to Sales - Others"
+            ],
+            "Other revenue": [
+                "Uncategorised Operating Income"
+            ]
+        },
+        "Other Income": {
+            "Foreign exchange Gain": [
+                "Unrealised Foreign Exchange Gain (Non-Trade)",
+                "Realised Foreign Exchange Gain (Non-Trade)",
+                "Unrealised Foreign Exchange Gain",
+                "Realised Foreign Exchange Gain"
+            ],
+            "Dividend Income": [
+                "Dividend Income - From Companies in Singapore",
+                "Dividend Income - From Companies outside Singapore"
+            ],
+            "Rental Income": [
+                "Rental Income"
+            ],
+            "Other Finance Income": [
+                "Other Finance Income"
+            ],
+            "Royalties, Licences and Franchise Fees": [
+                "Income from Licenses",
+                "Income from Franchise Fees",
+                "Income from Royalties"
+            ],
+            "Government grants": [
+                "Government Grants - Capital Assets",
+                "Government Grants - Revenue Expenses"
+            ],
+            "Trust Income": [
+                "Other Trust Income",
+                "Real Estate Investment Trust Income"
+            ],
+            "Gain on Disposal of Asset": [
+                "Gain on Disposal of Other Assets",
+                "Gain on Disposal of Property (Own Usage)",
+                "Gain on Disposal of Biological Asset Investments",
+                "Gain on Disposal of Assets under Construction Progress",
+                "Gain on Disposal of Plant and Equipment (Own Usage)",
+                "Gain on Disposal of Investment Properties",
+                "Gain on Disposal of Exploration and Evaluation Assets ",
+                "Gain on Disposal of Exploration and Evaluation Assets (Own Usage)",
+                "Gain on Disposal of Biological Assets (Own Usage)",
+                "Gain on Disposal of Other Tangible Assets"
+            ],
+            "Gain on Disposal of Intangible Assets": [
+                "Gain on Disposal of Intellectual Property Assets",
+                "Gain on Disposal of Other Intangible Assets NEC",
+                "Gain on Disposal of Right of Use Assets",
+                "Gain on Disposal of Software Codes ",
+                "Gain on Disposal of Copyrights and Patents ",
+                "Gain on Disposal of Goodwill",
+                "Gain on Disposal of Licenses And Franchises"
+            ],
+            "Gain on Disposal of Investments": [
+                "Gain on Disposal of Share Investments (FVTPL)",
+                "Gain on Disposal of Bond Investments (FVTPL)",
+                "Gain on Disposal of Subsidiaries",
+                "Transfer In Fair Value Gain From Reserve on Disposal of Debt Security Investments (FVOCI)",
+                "Gain on Disposal of Other Investments and Other Financial Assets ",
+                "Gain on Disposal of Share Investments (FVOCI)",
+                "Gain on Disposal of Joint Ventures",
+                "Gain on Disposal of Associates",
+                "Gain on Disposal of Bond Investments (FVOCI)"
+            ],
+            "Income From Discontinued Operations": [
+                "Income From Discontinued Operations"
+            ],
+            "Income From Waiver of Liabilities": [
+                "Income From Waiver of Liabilities"
+            ],
+            "Other Income": [
+                "Other Income From Sales of Scrapped Materials",
+                "Other Income From Contractual Fines and Penalties",
+                "Other Income From Reimbursement from Insurance Policies",
+                "Other Income "
+            ],
+            "Gain from Reversal of Impairment": [
+                "Gain from Reversal of Impairment of Plant and Equipment (Own Usage)",
+                "Gain from Reversal of Impairment of Biological Assets (Own Usage)",
+                "Gain from Reversal of Impairment of Assets under Construction Progress",
+                "Gain from Reversal of Impairment of Exploration and Evaluation Assets (Own Usage)",
+                "Gain from Reversal of Impairment of Other Assets",
+                "Gain from Reversal of Impairment of Property (Own Usage)"
+            ],
+            "Gain from Reversal of Impairment of Intangible Assets": [
+                "Gain from Reversal of Impairment of Licenses And Franchises",
+                "Gain from Reversal of Impairment of Software Codes ",
+                "Gain from Reversal of Impairment of Other Intangible Assets",
+                "Gain from Reversal of Impairment of Copyrights and Patents ",
+                "Gain from Reversal of Impairment of Intellectual Property Assets",
+                "Gain from Reversal of Impairment of Right of Use Assets"
+            ],
+            "Gain from Reversal of Impairment of Investments": [
+                "Gain from Reversal of Impairment of Other Investments (FVOCI)",
+                "Gain from Reversal of Impairment of Bond Investments (FVOCI)"
+            ],
+            "Gain from Reversal of Impairment of Subsidiaries": [
+                "Gain from Reversal of Impairment of Subsidiaries"
+            ],
+            "Gain from Reversal of Impairment of Other Investments": [
+                "Gain from Reversal of Impairment of Other Investments"
+            ],
+            "Gain from Reversal of Impairment of Inventories": [
+                "Gain from Reversal of Impairment of Inventories"
+            ],
+            "Gain from Reversal of Impairment of Trade and Other Receivables": [
+                "Gain from Reversal of Impairment of Trade and Other Receivables"
+            ],
+            "Gain from Reversal of Impairment of Other Assets NEC": [
+                "Gain from Reversal of Impairment of Other Assets"
+            ],
+            "Gains from Fair Value Adjustment of Assets": [
+                "Gain from Fair Value Adjustment of Financial Derivatives",
+                "Gain from Fair Value Adjustment of Biological Asset Investments",
+                "Gain from Fair Value Adjustment of Other Investments and Other Financial Assets",
+                "Gain from Fair Value Adjustment of Monetary Assets - Unrealised Currency Exchange",
+                "Gain from Fair Value Adjustment of Exploration and Evaluation Asset Investments",
+                "Gain from Fair Value Adjustment of Investment Properties",
+                "Gain from Fair Value Adjustment of Share Investments (FVTPL)",
+                "Gain from Fair Value Adjustment of Bond Investments (FVTPL)",
+                "Gain from Fair Value Adjustment of Other Tangible Asset Investments"
+            ],
+            "Gains from Fair Value Adjustment of Derivative Financial Assets (FVTPL)": [
+                "Gain from Fair Value Adjustment of Derivative Financial Assets - Warrants (FVTPL)",
+                "Gain from Fair Value Adjustment of Derivative Financial Assets - Financial Guarantees (FVTPL)",
+                "Gain from Fair Value Adjustment of Derivative Financial Assets - Futures (FVTPL)",
+                "Gain from Fair Value Adjustment of Derivative Financial Assets - Loan Commitments (FVTPL)",
+                "Gains from Fair Value Adjustment of Other Derivative Financial Assets (FVTPL)",
+                "Gain from Fair Value Adjustment of Derivative Financial Assets - Swaps (FVTPL)",
+                "Gain from Fair Value Adjustment of Derivative Financial Assets - Options (FVTPL)"
+            ]
+        },
+        "Finance Income": {
+            "Interest Income": [
+                "Interest Income from Financial Derivative Assets",
+                "Interest Income from Financial Assets Accounted for Under Amortised Cost",
+                "Other Interest Income",
+                "Interest Income from Bond investments"
+            ]
+        },
+        "Share of Profit or Loss of Equity-Accounted Investees, Net of Tax": {
+            "Share of Profits of Associates": [
+                "Share of Profits of Associates"
+            ],
+            "Share of Profits of Joint Ventures": [
+                "Share of Profits of Joint Ventures"
+            ]
+        },
+        "Interest Income": {
+            "Interest Income": [
+                "Interest Income from Financial Derivative Assets",
+                "Interest Income from Financial Assets Accounted for Under Amortised Cost",
+                "Other Interest Income",
+                "Interest Income from Bond investments"
+            ]
+        }
+    },
+    "Cost/Expense": {
+        "Cost of Sales": {
+            "Cost of Production for Manufacturing": [
+                "Shipping and Freight Forwarding for Production Materials - International",
+                "Shipping and Freight Forwarding for Production Materials - Local",
+                "Purchases for Packaging Materials",
+                "Purchases for Raw Materials ",
+                "Purchases for Work in Progress",
+                "Purchases for Semi-finished Goods",
+                "Other Freight and Transport Charges For Production Materials",
+                "Purchases for Components and Parts",
+                "Purchases for Finished Goods",
+                "Handling and Warehousing For Production Materials"
+            ],
+            "Cost of Sales for Merchandise Trade": [
+                "Purchases For Merchandise Trade - Retail Merchandise - Handphones, Simcards and Off The Shelf Software",
+                "Shipping and Freight Forwarding for Merchandise Trade - Local",
+                "Purchases For Merchandise Trade - Wholesale Merchandise - Handphones, Simcards and Off The Shelf Software",
+                "Shipping and Freight Forwarding for Merchandise Trade - International",
+                "Purchases For Merchandise Trade - Retail Merchandise - Others",
+                "Handling and Warehousing For Merchandise Trade",
+                "Purchases For Merchandise Trade - Wholesale Merchandise - Others",
+                "Other Freight and Transport Charges For Merchandise Trade"
+            ]
+        },
+        "Marketing and Distribution Expenses": {
+            "Marketing Expenses": [
+                "Coupon Voucher and Gifts",
+                "Other Media Expenses",
+                "Publication and Periodicals",
+                "Advertising Expenses",
+                "Brochures Sales Catalogues",
+                "Promotion Items and Giveaways "
+            ],
+            "Meal and Entertainment Expenses": [
+                "Meal and Entertainment Expenses"
+            ],
+            "Transportation Expenses": [
+                "Public Transport Expenses",
+                "Freight Out Expenses",
+                "Private Car Expenses",
+                "Delivery Expenses"
+            ],
+            "Overseas Travels": [
+                "Per Diem",
+                "Other Travel Expenses",
+                "Airline and Other Transportation Expenses",
+                "Accommodation"
+            ],
+            "Warranty Expenses": [
+                "Warranty Expenses"
+            ],
+            "Gift and Donation Expenses": [
+                "Gift and Donation Expenses"
+            ],
+            "Other Marketing and Distribution Expenses": [
+                "Other Marketing and Distribution Expenses"
+            ]
+        },
+        "Administration and Other Expenses": {
+            "Insurance": [
+                "Equipment Insurance",
+                "Property Insurance",
+                "General Business Insurance",
+                "Vehicle Insurance"
+            ],
+            "IT And Communication ": [
+                "Land Lines",
+                "Other IT and Communication Expenses",
+                "Mobile Phones",
+                "IT Infrastructure and Support",
+                "Internet"
+            ],
+            "Utilities ": [
+                "Electricity Expenses",
+                "Water and Sewerage Expenses",
+                "Waste Removal Expenses",
+                "Other Utility Expenses NEC"
+            ],
+            "Lease Payments of Short Term or Variable Nature": [
+                "Hardware and System Rental Expenses (Short Term)",
+                "Vehicle Rental Expenses (Short Term)",
+                "Building and Office Rental Expenses (Short Term)",
+                "Machinery and Equipment Rental Expenses (Short Term)",
+                "Other Rental Expenses (Short Term)"
+            ],
+            "Professional Service Charges": [
+                "Company Incorporation Expenses",
+                "Commission Agent Services",
+                "Inspection Testing and Specification",
+                "Training and Staff Development",
+                "Other Professional Service Expenses",
+                "Management Consulting",
+                "Legal Expenses",
+                "Engineering and Architectural Fees",
+                "Accounting, Audit, Tax and Secretarial Expenses"
+            ],
+            "Office Administration Expenses": [
+                "Printing Expenses",
+                "Delivery Expenses",
+                "Property Service and Cleaning Charges",
+                "Office Sundry Supplies",
+                "Pantry Expenses",
+                "Other Office Administration Expenses ",
+                "Expensed Assets",
+                "Stationery Expenses",
+                "Maintenance and Repair Expenses"
+            ],
+            "Collection Charges": [
+                "Other Collection Charges",
+                "Payment Gateway Charges",
+                "Bank Charges and Fees"
+            ],
+            "Directors' Remuneration and CPF Contributions": [
+                "Directors' Remuneration - Full-time/part-time Staff (Net CPF)",
+                "Directors' Remuneration - Employee CPF Expense",
+                "Directors' Remuneration - Time-based Staff (Net CPF)",
+                "Directors' Remuneration - Employer CPF Expense"
+            ],
+            "Directors' Benefits in Kind": [
+                "Directors' Remuneration - Benefits in Kind (Net CPF)"
+            ],
+            "Other Directors' Costs": [
+                "Directors' Remuneration - Other expenses",
+                "Directors' Remuneration - Foreign Worker Levy",
+                "Directors' Fees",
+                "Directors' Remuneration - Skill Development Fund"
+            ],
+            "Staff Remuneration and CPF Contributions": [
+                "Research and Development Staff Cost - Employee CPF Expense",
+                "Administration Office Staff Cost - Employee CPF Expense",
+                "Marketing and Distribution Staff Cost - Full-time/part-time Staff (Net CPF)",
+                "Production Staff Cost - Full-time/part-time Staff (Net CPF)",
+                "Marketing and Distribution Staff Cost - Employer CPF Expense",
+                "Administration Office Staff Cost - Time-based Staff (Net CPF)",
+                "Marketing and Distribution Staff Cost - Time-based Staff (Net CPF)",
+                "Administration Office Staff Cost - Full-time/part-time Staff (Net CPF)",
+                "Administration Office Staff Cost - Employer CPF Expense",
+                "Research and Development Staff Cost - Employer CPF Expense",
+                "Production Staff Cost - Employee CPF Expense",
+                "Marketing and Distribution Staff Cost - Employee CPF Expense",
+                "Production Staff Cost - Time-based Staff (Net CPF)",
+                "Production Staff Cost - Employer CPF Expense",
+                "Research and Development Staff Cost - Full-time/part-time Staff (Net CPF)",
+                "Research and Development Staff Cost - Time-based Staff (Net CPF)"
+            ],
+            "Staff Benefits in Kind": [
+                "Administration Office Staff Cost - Benefits in Kind (Net CPF)",
+                "Production Staff Cost - Benefits in Kind (Net CPF)",
+                "Research and Development Staff Cost - Benefits in Kind (Net CPF)",
+                "Marketing and Distribution Staff Cost - Benefits in Kind (Net CPF)"
+            ],
+            "Other Staff Costs": [
+                "Marketing and Distribution Staff Cost - Other expenses",
+                "Marketing and Distribution Staff Cost - Foreign Worker Levy",
+                "Other Employee Benefits - Medical expenses and insurance (non-regulatory)",
+                "Production Staff Cost - Foreign Worker Levy",
+                "Other Employee Benefits - Club Subscription Fees",
+                "Production Staff Cost - Other expenses",
+                "Administration Office Staff Cost - Skill Development Fund",
+                "Other Employee Benefits - Expenses associated gambling and game of chances",
+                "Production Staff Cost - Skill Development Fund",
+                "Marketing and Distribution Staff Cost - Skill Development Fund",
+                "Other Employee Benefits - Medical insurance under Work Injury Compensation Act",
+                "Research and Development Staff Cost - Other expenses",
+                "Administration Office Staff Cost - Foreign Worker Levy",
+                "Research and Development Staff Cost - Foreign Worker Levy",
+                "Research and Development Staff Cost - Skill Development Fund",
+                "Administration Office Staff Cost - Other expenses"
+            ],
+            "Depreciation Expense": [
+                "Depreciation of Plant and Equipment",
+                "Depreciation of Exploration and Evaluation Assets ",
+                "Depreciation of Other Assets",
+                "Depreciation of Biological Assets ",
+                "Depreciation of Property"
+            ],
+            "Amortisation Expense": [
+                "Amortisation of Intangible Assets"
+            ]
+        },
+        "Research and Development Expenses": {
+            "Research and Development": [
+                "Research and Development"
+            ]
+        },
+        "Other Expenses": {
+            "Foreign Exchange Loss": [
+                "Realised Foreign Exchange Loss (Non-Trade)",
+                "Unrealised Foreign Exchange Loss",
+                "Unrealised Foreign Exchange Loss (Non-Trade)",
+                "Realised Foreign Exchange Loss"
+            ],
+            "Other Finance Expenses": [
+                "Other Finance Expenses"
+            ],
+            "Other Expenses": [
+                "Uncategorised Expenses",
+                "Penalties and fines",
+                "Other Expenses",
+                "Gifting of goods purchased from GST-registered suppliers "
+            ],
+            "Donation Expenses": [
+                "Donation Expenses"
+            ],
+            "Restructuring Expenses": [
+                "Restructuring Expenses"
+            ],
+            "Operating Taxes": [
+                "Levies",
+                "Stamp Duties",
+                "Highway Tax",
+                "Property Tax",
+                "Custom Duties",
+                "Sales Used and Excise Duties",
+                "Foreign Withholding Taxes",
+                "Other Taxes "
+            ],
+            "Loss on Disposal of Property, Plant and Equipment": [
+                "Loss on Disposal of Exploration and Evaluation Assets",
+                "Loss on Disposal of Biological Assets (Sales Proceeds)",
+                "Loss on Disposal of Assets under Construction Progress",
+                "Loss on Disposal of Biological Assets",
+                "Loss on Disposal of Property (Sales Proceeds)",
+                "Loss on Disposal of Other Assets (Sales Proceeds)",
+                "Loss on Disposal of Plant and Equipment",
+                "Loss on Disposal of Other Assets",
+                "Loss on Disposal of Plant and Equipment (Sales Proceeds)",
+                "Loss on Disposal of Assets under Construction Progress (Sales Proceeds)",
+                "Loss on Disposal of Exploration and Evaluation Assets (Sales Proceeds)",
+                "Loss on Disposal of Property"
+            ],
+            "Loss on Disposal of Tangible Assets": [
+                "Loss on Disposal of Other Tangible Assets NEC",
+                "Loss on Disposal of Investment Properties",
+                "Loss on Disposal of Investment Properties (Sales Proceeds)",
+                "Loss on Disposal of Other Tangible Assets NEC (Sales Proceeds)",
+                "Loss on Disposal of Biological Asset Investments",
+                "Loss on Disposal of Biological Asset Investments (Sales Proceeds)",
+                "Loss on Disposal of Exploration and Evaluation Assets ",
+                "Loss on Disposal of Exploration and Evaluation Assets (Sales Proceeds)"
+            ],
+            "Loss on Disposal of Intangible Assets": [
+                "Loss on Disposal of Other Intangible Assets (Sales Proceeds)",
+                "Loss on Disposal of Copyrights and Patents (Sales Proceeds)",
+                "Loss on Disposal of Licenses And Franchises (Sales Proceeds)",
+                "Loss on Disposal of Right of Use Assets (Sales Proceeds)",
+                "Loss on Disposal of Intellectual Property Assets (Sales Proceeds)",
+                "Loss on Disposal of Intellectual Property Assets",
+                "Loss on Disposal of Goodwill",
+                "Loss on Disposal of Licenses And Franchises",
+                "Loss on Disposal of Software Codes ",
+                "Loss on Disposal of Goodwill (Sales Proceeds)",
+                "Loss on Disposal of Software Codes (Sales Proceeds)",
+                "Loss on Disposal of Copyrights and Patents ",
+                "Loss on Disposal of Right of Use Assets",
+                "Loss on Disposal of Other Intangible Assets"
+            ],
+            "Loss on Disposal of Investments": [
+                "Loss on Disposal of Share Investments (FVOCI) (Sales Proceeds)",
+                "Loss on Disposal of Bond Investments (FVOCI) (Sales Proceeds)",
+                "Loss on Disposal of Joint Ventures (Sales Proceeds)",
+                "Loss on Disposal of Bond Investments (FVOCI)",
+                "Loss on Disposal of Other Investments and Other Financial Assets",
+                "Loss on Disposal of Subsidiaries",
+                "Loss on Disposal of Share Investments (FVTPL)",
+                "Loss on Disposal of Bond Investments (FVTPL) (Sales Proceeds)",
+                "Loss on Disposal of Other Investments and Other Financial Assets (Sales Proceeds)",
+                "Loss on Disposal of Associates (Sales Proceeds)",
+                "Loss on Disposal of Joint Ventures",
+                "Loss on Disposal of Subsidiaries (Sales Proceeds)",
+                "Loss on Disposal of Associates",
+                "Loss on Disposal of Bond Investments (FVTPL)",
+                "Loss on Disposal of Share Investments (FVTPL) (Sales Proceeds)",
+                "Loss on Disposal of Share Investments (FVOCI)"
+            ],
+            "Loss on Disposal of Liabilities": [
+                "Loss on Disposal of Liabilities (Amortised Cost)",
+                "Loss on Disposal of Liabilities (FVTPL)"
+            ],
+            "Loss From Impairment of Property, Plant and Equipment": [
+                "Loss From Impairment of Other Assets",
+                "Loss From Impairment of Exploration and Evaluation Assets ",
+                "Loss From Impairment of Biological Assets ",
+                "Loss From Impairment of Plant and Equipment",
+                "Loss From Impairment of Assets under Construction Progress ",
+                "Loss From Impairment of Property "
+            ],
+            "Loss From Impairment of Intangible Assets": [
+                "Loss From Impairment of Copyrights and Patents ",
+                "Loss From Impairment of Software Codes ",
+                "Loss From Impairment of Intellectual Property Assets",
+                "Loss From Impairment of Goodwill",
+                "Loss From Impairment of Licenses And Franchises",
+                "Loss From Impairment of Other Intangible Assets",
+                "Loss From Impairment of Right of Use Assets"
+            ],
+            "Loss From Impairment of Investments": [
+                "Impairment of Subsidiaries",
+                "Impairment of Debt Security Investments - FVOCI",
+                "Impairment of Other Investments"
+            ],
+            "Loss From Impairment of Inventories": [
+                "Loss From Impairment of Inventories"
+            ],
+            "Loss From Impairment of Trade and Other Receivables": [
+                "Loss From Impairment of Trade and Other Receivables"
+            ],
+            "Loss From Impairment of Other Assets ": [
+                "Loss From Impairment of Other Assets "
+            ],
+            "Loss from Fair Value Adjustment of Assets": [
+                "Loss from Fair Value Adjustment of Biological Asset Investments",
+                "Loss from Fair Value Adjustment of Monetary Assets - Unrealised Currency Exchange",
+                "Loss from Fair Value Adjustment of Share Investments (FVTPL)",
+                "Loss from Fair Value Adjustment of Other Investments and Other Financial Assets",
+                "Loss from Fair Value Adjustment of Exploration and Evaluation Asset Investments",
+                "Loss from Fair Value Adjustment of Other Tangible Asset Investments",
+                "Loss from Fair Value Adjustment of Bond Investments (FVTPL)",
+                "Loss from Fair Value Adjustment of Investment Properties",
+                "Loss from Fair Value Adjustment of Financial Derivatives"
+            ],
+            "Loss from Fair Value Adjustment of Derivative Financial Liabilities (FVTPL)": [
+                "Loss from Fair Value Adjustment of Derivative Financial Liabilities - Swaps (FVTPL)",
+                "Loss from Fair Value Adjustment of Derivative Financial Liabilities - Options (FVTPL)",
+                "Loss from Fair Value Adjustment of Derivative Financial Liabilities - Financial Guarantees (FVTPL)",
+                "Loss from Fair Value Adjustment of Derivative Financial Liabilities - Loan Commitments (FVTPL)",
+                "Loss from Fair Value Adjustment of Other Derivative Financial Liabilities (FVTPL)",
+                "Loss from Fair Value Adjustment of Derivative Financial Liabilities - Warrants (FVTPL)",
+                "Loss from Fair Value Adjustment of Derivative Financial Liabilities - Futures (FVTPL)"
+            ],
+            "Loss from Discontinued Operations": [
+                "Loss from Discontinued Operations (NBV)",
+                "Loss from Discontinued Operations (Sales Proceeds)"
+            ],
+            "Loss on Hedging on Cashflow for Foreign Operations": [
+                "Loss on Hedging on Cashflow for Foreign Operations"
+            ]
+        },
+        "Finance Costs": {
+            "Interest Expenses": [
+                "Interest Expenses From Bank Overdraft",
+                "Interest Expenses From Right of Use Liabilities",
+                "Interest Expenses From Loans And Borrowings",
+                "Interest Expenses From Commercial Papers",
+                "Interest Expenses From Bonds",
+                "Interest Expenses From Finance Lease Liabilities",
+                "Interest Expenses From Trade Transactions",
+                "Other Interest Expenses"
+            ]
+        },
+        "Income Tax Expense": {
+            "Corporate Income Taxes": [
+                "Income Tax Credit",
+                "Income Tax Expense"
+            ]
+        },
+        "Share of Profit or Loss of Equity-Accounted Investees, Net of Tax": {
+            "Share of Losses of Associates": [
+                "Share of Losses of Associates"
+            ],
+            "Share of Losses of Joint Ventures": [
+                "Share of Losses of Joint Ventures"
+            ]
+        },
+        "Changes in inventories": {
+            "Cost of Production for Manufacturing": [
+                "Shipping and Freight Forwarding for Production Materials - International",
+                "Shipping and Freight Forwarding for Production Materials - Local",
+                "Purchases for Packaging Materials",
+                "Purchases for Raw Materials ",
+                "Purchases for Work in Progress",
+                "Purchases for Semi-finished Goods",
+                "Other Freight and Transport Charges For Production Materials",
+                "Purchases for Components and Parts",
+                "Purchases for Finished Goods",
+                "Handling and Warehousing For Production Materials"
+            ],
+            "Cost of Sales for Merchandise Trade": [
+                "Purchases For Merchandise Trade - Retail Merchandise - Handphones, Simcards and Off The Shelf Software",
+                "Shipping and Freight Forwarding for Merchandise Trade - Local",
+                "Purchases For Merchandise Trade - Wholesale Merchandise - Handphones, Simcards and Off The Shelf Software",
+                "Shipping and Freight Forwarding for Merchandise Trade - International",
+                "Purchases For Merchandise Trade - Retail Merchandise - Others",
+                "Handling and Warehousing For Merchandise Trade",
+                "Purchases For Merchandise Trade - Wholesale Merchandise - Others",
+                "Other Freight and Transport Charges For Merchandise Trade"
+            ]
+        },
+        "Other Operating Expenses": {
+            "Marketing Expenses": [
+                "Coupon Voucher and Gifts",
+                "Other Media Expenses",
+                "Publication and Periodicals",
+                "Advertising Expenses",
+                "Brochures Sales Catalogues",
+                "Promotion Items and Giveaways "
+            ],
+            "Meal and Entertainment Expenses": [
+                "Meal and Entertainment Expenses"
+            ],
+            "Transportation Expenses": [
+                "Public Transport Expenses",
+                "Freight Out Expenses",
+                "Private Car Expenses",
+                "Delivery Expenses"
+            ],
+            "Overseas Travels": [
+                "Per Diem",
+                "Other Travel Expenses",
+                "Airline and Other Transportation Expenses",
+                "Accommodation"
+            ],
+            "Warranty Expenses": [
+                "Warranty Expenses"
+            ],
+            "Gift and Donation Expenses": [
+                "Gift and Donation Expenses"
+            ],
+            "Other Marketing and Distribution Expenses": [
+                "Other Marketing and Distribution Expenses"
+            ],
+            "Insurance": [
+                "Equipment Insurance",
+                "Property Insurance",
+                "General Business Insurance",
+                "Vehicle Insurance"
+            ],
+            "IT And Communication ": [
+                "Land Lines",
+                "Other IT and Communication Expenses",
+                "Mobile Phones",
+                "IT Infrastructure and Support",
+                "Internet"
+            ],
+            "Utilities ": [
+                "Electricity Expenses",
+                "Water and Sewerage Expenses",
+                "Waste Removal Expenses",
+                "Other Utility Expenses NEC"
+            ],
+            "Professional Service Charges": [
+                "Company Incorporation Expenses",
+                "Commission Agent Services",
+                "Inspection Testing and Specification",
+                "Training and Staff Development",
+                "Other Professional Service Expenses",
+                "Management Consulting",
+                "Legal Expenses",
+                "Engineering and Architectural Fees",
+                "Accounting, Audit, Tax and Secretarial Expenses"
+            ],
+            "Office Administration Expenses": [
+                "Printing Expenses",
+                "Delivery Expenses",
+                "Property Service and Cleaning Charges",
+                "Office Sundry Supplies",
+                "Pantry Expenses",
+                "Other Office Administration Expenses ",
+                "Expensed Assets",
+                "Stationery Expenses",
+                "Maintenance and Repair Expenses"
+            ],
+            "Collection Charges": [
+                "Other Collection Charges",
+                "Payment Gateway Charges",
+                "Bank Charges and Fees"
+            ]
+        },
+        "Lease Payments of Short Term or Variable Nature": {
+            "Lease Payments of Short Term or Variable Nature": [
+                "Hardware and System Rental Expenses (Short Term)",
+                "Vehicle Rental Expenses (Short Term)",
+                "Building and Office Rental Expenses (Short Term)",
+                "Machinery and Equipment Rental Expenses (Short Term)",
+                "Other Rental Expenses (Short Term)"
+            ]
+        },
+        "Employee Benefit Expenses": {
+            "Staff Remuneration and CPF Contributions": [
+                "Research and Development Staff Cost - Employee CPF Expense",
+                "Administration Office Staff Cost - Employee CPF Expense",
+                "Marketing and Distribution Staff Cost - Full-time/part-time Staff (Net CPF)",
+                "Production Staff Cost - Full-time/part-time Staff (Net CPF)",
+                "Marketing and Distribution Staff Cost - Employer CPF Expense",
+                "Administration Office Staff Cost - Time-based Staff (Net CPF)",
+                "Marketing and Distribution Staff Cost - Time-based Staff (Net CPF)",
+                "Administration Office Staff Cost - Full-time/part-time Staff (Net CPF)",
+                "Administration Office Staff Cost - Employer CPF Expense",
+                "Research and Development Staff Cost - Employer CPF Expense",
+                "Production Staff Cost - Employee CPF Expense",
+                "Marketing and Distribution Staff Cost - Employee CPF Expense",
+                "Production Staff Cost - Time-based Staff (Net CPF)",
+                "Production Staff Cost - Employer CPF Expense",
+                "Research and Development Staff Cost - Full-time/part-time Staff (Net CPF)",
+                "Research and Development Staff Cost - Time-based Staff (Net CPF)"
+            ],
+            "Staff Benefits in Kind": [
+                "Administration Office Staff Cost - Benefits in Kind (Net CPF)",
+                "Production Staff Cost - Benefits in Kind (Net CPF)",
+                "Research and Development Staff Cost - Benefits in Kind (Net CPF)",
+                "Marketing and Distribution Staff Cost - Benefits in Kind (Net CPF)"
+            ],
+            "Other Staff Costs": [
+                "Marketing and Distribution Staff Cost - Other expenses",
+                "Marketing and Distribution Staff Cost - Foreign Worker Levy",
+                "Other Employee Benefits - Medical expenses and insurance (non-regulatory)",
+                "Production Staff Cost - Foreign Worker Levy",
+                "Other Employee Benefits - Club Subscription Fees",
+                "Production Staff Cost - Other expenses",
+                "Administration Office Staff Cost - Skill Development Fund",
+                "Other Employee Benefits - Expenses associated gambling and game of chances",
+                "Production Staff Cost - Skill Development Fund",
+                "Marketing and Distribution Staff Cost - Skill Development Fund",
+                "Other Employee Benefits - Medical insurance under Work Injury Compensation Act",
+                "Research and Development Staff Cost - Other expenses",
+                "Administration Office Staff Cost - Foreign Worker Levy",
+                "Research and Development Staff Cost - Foreign Worker Levy",
+                "Research and Development Staff Cost - Skill Development Fund",
+                "Administration Office Staff Cost - Other expenses"
+            ]
+        },
+        "Depreciation Expense": {
+            "Depreciation Expense": [
+                "Depreciation of Plant and Equipment",
+                "Depreciation of Exploration and Evaluation Assets ",
+                "Depreciation of Other Assets",
+                "Depreciation of Biological Assets ",
+                "Depreciation of Property"
+            ]
+        },
+        "Amortisation Expense": {
+            "Amortisation Expense": [
+                "Amortisation of Intangible Assets"
+            ]
+        }
+    }
+}

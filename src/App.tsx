@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { FileSelection } from './components/FileSelection';
 import { FileUpload } from './components/FileUpload';
+import { PDFUpload } from './components/PDFUpload';
 import { FileList } from './components/FileList';
 import { FileEdit } from './components/FileEdit';
 import { Auth } from './components/Auth';
 import { supabase } from './lib/supabase';
-import { LogOut } from 'lucide-react';
+import { LogOut, FileSpreadsheet } from 'lucide-react';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -44,9 +46,14 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-100 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold">File Upload System</h1>
+            <div className="flex items-center gap-3">
+              <FileSpreadsheet className="w-8 h-8 text-blue-600" />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                conv3rt
+              </h1>
+            </div>
             {user && (
               <button
                 onClick={handleSignOut}
@@ -62,9 +69,30 @@ function App() {
             {user ? (
               <Routes>
                 <Route path="/" element={
+                  <FileSelection />
+                } />
+                <Route path="/upload-excel" element={
                   <>
                     <FileUpload onFileUploaded={handleFileUploaded} />
-                    <FileList files={files} setFiles={setFiles} />
+                    <FileList 
+                      files={files} 
+                      setFiles={setFiles} 
+                      category="excel"
+                      title="Excel Documents"
+                      className="border-t pt-8"
+                    />
+                  </>
+                } />
+                <Route path="/upload-pdf" element={
+                  <>
+                    <PDFUpload onFileUploaded={handleFileUploaded} />
+                    <FileList 
+                      files={files} 
+                      setFiles={setFiles} 
+                      category="pdf"
+                      title="PDF Documents"
+                      className="border-t pt-8"
+                    />
                   </>
                 } />
                 <Route path="/edit/:fileId" element={<FileEdit />} />
