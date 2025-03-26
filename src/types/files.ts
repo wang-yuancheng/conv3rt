@@ -16,4 +16,6 @@ export interface FileRecord {
   reformatted_at?: string;
   processed_data?: any[];
   processed_at?: string;
+  is_converted_from_pdf?: boolean;
+  converted_from_file_id?: string;
 }

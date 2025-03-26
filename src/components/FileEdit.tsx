@@ -5,10 +5,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Range, read, utils } from 'xlsx';
 import { STORAGE_BUCKET, supabase } from '../lib/supabase';
 import type { FileRecord } from '../types/files';
-// import { pdfjs } from "pdfjs-dist";
-
-// // Configure the PDF worker
-// pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 
 interface CellStyle {
@@ -61,7 +57,7 @@ const convertExcelColor = (color: { rgb?: string; theme?: number } | undefined):
   return color.theme !== undefined ? themeColors[color.theme] : undefined;
 };
 
-export const FileEdit: React.FC = () => {
+const FileEdit: React.FC = () => {
   const { fileId } = useParams<{ fileId: string }>();
   const navigate = useNavigate();
   const [file, setFile] = useState<FileRecord | null>(null);
@@ -72,11 +68,14 @@ export const FileEdit: React.FC = () => {
   const [editingCell, setEditingCell] = useState<{ sheetIndex: number; row: number; col: number } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const [savingReformat, setSavingReformat] = useState(false);
+  const [savingProcess, setSavingProcess] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [hasReformatted, setHasReformatted] = useState<boolean>(false);
   const [processSuccess, setProcessSuccess] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [converting, setConverting] = useState(false);
+  const [hasAccountType, setHasAccountType] = useState(false);
 
   const loadProcessedData = async (fileData: FileRecord) => {
     if (!fileData.processed_data || !Array.isArray(fileData.processed_data)) return;
@@ -157,10 +156,8 @@ export const FileEdit: React.FC = () => {
       // Update the UI
       const newWorksheets = [...worksheets];
       values.forEach((value, index) => {
-        // Skip header row (index + 1 since we want to start from row 2)
         const rowIndex = index + 1;
         if (rowIndex < newWorksheets[0].data.length) {
-          // Ensure the row and column exist before updating
           if (!newWorksheets[0].data[rowIndex]) {
             newWorksheets[0].data[rowIndex] = [];
           }
@@ -170,6 +167,7 @@ export const FileEdit: React.FC = () => {
           newWorksheets[0].data[rowIndex][columnNumber].value = value;
         }
       });
+
       setWorksheets(newWorksheets);
     } catch (err) {
       console.error('Error filling column:', err);
@@ -410,318 +408,258 @@ export const FileEdit: React.FC = () => {
 
   const handleRemoveFirstRows = async () => {
     if (!file) return;
-
+  
     const headerMappings = {
       'Account': 'Account Description',
-      'Debit - Year to date': 'Debit Amount',
-      'Credit - Year to date': 'Credit Amount'
+      'Debit': 'Debit Amount',
+      'Credit': 'Credit Amount',
+      'Type': 'Account Type' 
     };
-
+    const headerIndicators = ['Account Code', 'Account', 'Account Type', 'Debit - Year to date'];
+  
     try {
-      setSaving(true);
+      // setSaving(true);
+      setSavingReformat(true);
       setError('');
       setHasReformatted(true);
-      
-      // Update the reformatted status in the database
+  
+      // 1️⃣ 更新 DB 状态
       const { error: updateError } = await supabase
         .from('files')
-        .update({ 
-          reformatted: true,
-          reformatted_at: new Date().toISOString()
-        })
+        .update({ reformatted: true, reformatted_at: new Date().toISOString() })
         .eq('id', file.id);
 
-      if (updateError) throw updateError;
-
-      // Get the file from storage
+        setFile({
+          ...file,
+          reformatted: true,
+          reformatted_at: new Date().toISOString() 
+        });
+        
+      // 2️⃣ 下载 Excel
       const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .createSignedUrl(file.storage_path, 60);
-
       if (signedUrlError) throw signedUrlError;
-      if (!signedUrlData?.signedUrl) throw new Error('Failed to generate download URL');
-
-      // Download and modify the file
-      const response = await fetch(signedUrlData.signedUrl);
-      if (!response.ok) throw new Error('Failed to download file');
-
+      const response = await fetch(signedUrlData!.signedUrl);
       const arrayBuffer = await response.arrayBuffer();
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
+  
 
-      // Remove first 4 rows from each worksheet
-      workbook.worksheets.forEach(worksheet => {
-        if (!worksheet.rowCount || !worksheet.columnCount) return;
+      console.log(JSON.stringify(worksheets,null,2));
 
-        worksheet.spliceRows(1, 4);
-        
-        // Insert three new columns after Account Type (which will be in position 4 after reordering)
-        worksheet.spliceColumns(5, 0, [], [], []);
-        
-        // Set headers for the new columns
-        const headerRow = worksheet.getRow(1);
-        headerRow.getCell(5).value = 'Primary Classification';
-        headerRow.getCell(6).value = 'Secondary Classification';
-        headerRow.getCell(7).value = 'Tertiary Classification';
+      const newWorksheets = worksheets.map(sheet => {
+        // 找到数据起始（表头）行
+        const headerIndex = sheet.data.findIndex(row =>
+          row.some(cell =>
+            typeof cell.value === 'string' &&
+            headerIndicators.some(ind => ind.toLowerCase() === cell.value.toString().toLowerCase())
+          )
+        );
+        const start = headerIndex === -1 ? 0 : headerIndex;
+      
+        // 原始表头
+        const origHeader = sheet.data[start] || [];
+        const headerTexts = origHeader.map(cell => 
+          cell.value?.toString().trim().toLowerCase() || ''
+        );
 
-        // Get the last column number
-        const lastCol = worksheet.lastColumn?.number || 0;
-        if (lastCol > 0) {
-          // Delete the last column
-          worksheet.spliceColumns(lastCol, 1);
-        }
-        
-        // Update headers in the first row (previously 5th row)
-        worksheet.getRow(1).eachCell((cell, colNumber) => {
-          const currentValue = cell.value?.toString() || '';
-          if (currentValue && headerMappings[currentValue as keyof typeof headerMappings]) {
-            cell.value = headerMappings[currentValue];
-          }
+        // 检查是否存在Account Type或Type列
+      const hasAccountType = headerTexts.some(h => 
+        h === 'account type' || h === 'type'
+      );
+      setHasAccountType(hasAccountType)
+
+      console.log("hasAccountType: " + hasAccountType)
+
+        const keys = Object.keys(headerMappings);
+
+        // 根据 headerMappings 顺序获取对应列索引（三级匹配）
+        const colIndices = keys.map(key => {
+          const lowerKey = key.toLowerCase();
+          const mappedValue = headerMappings[key].toLowerCase();
+
+          // 1️⃣ 完全匹配 mapping value（例如 "Account Description"）
+          let idx = headerTexts.findIndex(h => h === mappedValue);
+          if (idx >= 0) return idx;
+
+          // 2️⃣ 完全匹配 mapping key（例如 "Account"）
+          idx = headerTexts.findIndex(h => h === lowerKey);
+          if (idx >= 0) return idx;
+
+          // 3️⃣ 包含 mapping key（例如 "Account Name"）
+          return headerTexts.findIndex(h => h.includes(lowerKey));
         });
 
-        // Move column 2 to position 4
-        const tempCol = worksheet.getColumn(2);
-        const tempValues = tempCol.values;
-        const tempStyles: Record<number, any> = {};
+        return {
+          ...sheet,
+          data: sheet.data
+            .slice(start)
+            .map((row, rowIndex) => {
+              // 仅保留 headerMappings 定义的列
+              const filtered = colIndices.map(i =>
+                i >= 0 && row[i] ? row[i] : { value: '', style: {} }
+              );
+      
+              if (rowIndex === 0) {
+                // 表头行：替换名称并插入分类列
+                const header = keys.map(key => ({
+                  value: headerMappings[key],
+                  style: {}
+                }));
+                // 动态插入列
+              const insertColumns = [];
+              insertColumns.push(
+                { value: 'Primary Classification', style: {} },
+                { value: 'Secondary Classification', style: {} },
+                { value: 'Tertiary Classification', style: {} }
+              );
 
-        // Store styles for each cell in column 2
-        tempCol.eachCell((cell, rowNumber) => {
-          tempStyles[rowNumber] = {
-            style: cell.style || {},
-            alignment: cell.alignment || {},
-            border: cell.border || {},
-            fill: cell.fill || {},
-            font: cell.font || {}
-          };
-        });
-
-        // Shift columns 3 and 4 one position left
-        for (let row = 1; row <= worksheet.rowCount; row++) {
-          const cell3 = worksheet.getCell(row, 3);
-          if (!cell3) continue;
-
-          const cell4 = worksheet.getCell(row, 4);
-          if (!cell4) continue;
-
-          const cell2 = worksheet.getCell(row, 2);
-          if (!cell2) continue;
-          
-          cell2.value = cell3.value || null;
-          cell2.style = cell3.style || {};
-          
-          cell3.value = cell4.value || null;
-          cell3.style = cell4.style || {};
-        }
-
-        // Place column 2 values in position 4
-        for (let row = 1; row <= worksheet.rowCount; row++) {
-          const cell = worksheet.getCell(row, 4);
-          if (!cell) continue;
-
-          cell.value = tempValues[row] || null;
-          if (tempStyles[row]) {
-            Object.assign(cell, tempStyles[row]);
-          }
-        }
-
-        // Remove rows where first column is empty (from bottom to top to avoid index issues)
-        const hasNonEmptyValues = new Array(worksheet.columnCount).fill(false);
-
-        // First pass: identify non-empty columns
-        for (let row = 1; row <= worksheet.rowCount; row++) {
-          for (let col = 1; col <= worksheet.columnCount; col++) {
-            const cell = worksheet.getCell(row, col);
-            if (!cell) continue;
-
-            const value = cell.text || cell.value;
-            if (value && value.toString().trim() !== '') {
-              hasNonEmptyValues[col - 1] = true;
-            }
-          }
-        }
-
-        // Remove empty columns from right to left
-        for (let col = worksheet.columnCount; col >= 1; col--) {
-          if (!hasNonEmptyValues[col - 1]) {
-            worksheet.spliceColumns(col, 1);
-          }
-        }
-
-        // Then remove empty rows
-        for (let row = worksheet.rowCount; row >= 1; row--) {
-          const cell = worksheet.getCell(row, 1);
-          if (!cell) continue;
-
-          const value = cell.text || cell.value;
-          if (!value || value.toString().trim() === '') {
-            worksheet.spliceRows(row, 1);
-          }
-        }
+              header.splice(4, 0, ...insertColumns);
+              return header;
+              }
+      
+              const emptyColumns = [];
+              emptyColumns.push(
+                { value: '', style: {} },
+                { value: '', style: {} },
+                { value: '', style: {} }
+              );
+              filtered.splice(4, 0, ...emptyColumns);
+              return filtered;
+            })
+            .filter(row => row[0]?.value?.toString().trim().length > 0)
+        };
       });
-
-      // Convert to blob
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: file.type });
-
-      // Upload modified file
-      const { error: uploadError } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .update(file.storage_path, blob);
-
-      if (uploadError) throw uploadError;
-
-      // Update the UI
-      const newWorksheets = worksheets.map(sheet => ({
-        ...sheet,
-        data: sheet.data
-          .slice(4)
-          .map((row, rowIndex) => {
-          // Remove the last column from each row
-          const rowWithoutLastCol = row.slice(0, -1);
-          
-          // Reorder columns and add new columns in the UI data
-          const reorderedRow = [...rowWithoutLastCol];
-          const col2 = reorderedRow[1];
-          reorderedRow[1] = reorderedRow[2];
-          reorderedRow[2] = reorderedRow[3];
-          reorderedRow[3] = col2;
-
-          // Add three new columns after Account Type with headers in first row
-          if (rowIndex === 0) {
-            reorderedRow.splice(4, 0, 
-              { value: 'Primary Classification', style: {} },
-              { value: 'Secondary Classification', style: {} },
-              { value: 'Tertiary Classification', style: {} }
-            );
-          } else {
-            reorderedRow.splice(4, 0, 
-              { value: '', style: {} },
-              { value: '', style: {} },
-              { value: '', style: {} }
-            );
-          }
-
-          if (rowIndex === 0) {
-            return reorderedRow.map(cell => ({
-              ...cell,
-              value: cell.value?.toString() ? headerMappings[cell.value.toString() as keyof typeof headerMappings] || cell.value : cell.value
-            }));
-          }
-          return reorderedRow;
-        })
-          // Filter out rows where first column is empty
-          .filter(row => {
-            const firstCellValue = row[0].value;
-            return firstCellValue !== null && 
-                   firstCellValue !== undefined && 
-                   firstCellValue.toString().trim() !== '';
-          })
-      }));
+      if (updateError) throw updateError;
+      console.log(newWorksheets);
       setWorksheets(newWorksheets);
     } catch (err) {
       console.error('Error removing rows:', err);
       setError('Failed to remove rows. Please try again.');
     } finally {
-      setSaving(false);
+      setSavingReformat(false);
     }
   };
+ 
 
   const handleProcess = async () => {
     try {
       setProcessing(true);
-      setSaving(true);
+      setSavingProcess(false);
       setProcessSuccess(false);
       setError(null);
 
-      // Prepare the data from all worksheets
+      if (!worksheets[0]?.data) {
+        throw new Error('No worksheet data available');
+      }
+      
+      // Prepare data for processing, ensuring we handle undefined cells
       const excelData = worksheets.map(sheet => ({
         name: sheet.name,
-        data: sheet.data
+        data: sheet.data.slice(1) // Skip header row
+          .map(row => 
+            // Ensure row is an array and filter out hidden cells
+            (Array.isArray(row) ? row : [])
+              .filter(cell => cell && !cell.isHidden)
+              .map(cell => ({
+                value: cell?.value?.toString() || ''
+              }))
+          )
+          .filter(row => row.length > 0) // Remove empty rows
       }));
 
-      // Using POST /products/add endpoint which accepts POST requests
       const response = await fetch('http://localhost:3000/api/process', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ data: excelData })
+      }).catch(err => {
+        throw new Error('Failed to connect to server. Please ensure the server is running.');
       });
 
       if (!response.ok) throw new Error('Failed to process file');
       const processedData = await response.json();
       
       if (!Array.isArray(processedData) || processedData.length === 0) throw new Error('Invalid response from server');
+    
 
-      // Process each row of classifications
-      const promises = [];
-      
-      // Map the classifications to their respective columns (0-based indices)
-      const classifications = processedData.map(row => ({
-        accountType: row[0] || '',
-        primary: row[1] || '',
-        secondary: row[2] || '',
-        tertiary: row[3] || ''
-      }));
+    // 检查Account Type列是否有数据
+    const accountTypeColumnIndex = 4; // 根据实际列位置调整
 
-      // Update each classification column
-      promises.push(fillColumnWithValues(3, classifications.map(c => c.accountType)));    // Account Type
-      promises.push(fillColumnWithValues(4, classifications.map(c => c.primary)));        // Primary
-      promises.push(fillColumnWithValues(5, classifications.map(c => c.secondary)));      // Secondary
-      promises.push(fillColumnWithValues(6, classifications.map(c => c.tertiary)));       // Tertiary
 
-      // Wait for all columns to be updated
+    // 填充逻辑
+    const promises = [];
+    const classifications = processedData.map(row => ({
+      accountType: row[1] || '',
+      primary: row[2] || '',
+      secondary: row[3] || '',
+      tertiary: row[4] || ''
+    }));
+    
+    if (!hasAccountType) {
+      // 如果没有 accountType，则填充 accountType 到 accountTypeColumnIndex - 1
+      promises.push(fillColumnWithValues(accountTypeColumnIndex - 1, classifications.map(c => c.accountType)));
+    }
+    
+    promises.push(fillColumnWithValues(hasAccountType ? accountTypeColumnIndex : accountTypeColumnIndex, classifications.map(c => c.primary)));
+    promises.push(fillColumnWithValues(accountTypeColumnIndex + 1, classifications.map(c => c.secondary)));
+    promises.push(fillColumnWithValues(accountTypeColumnIndex + 2, classifications.map(c => c.tertiary)));
+
+
       await Promise.all(promises);
 
-      // Get the latest version of the file from storage
-      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-        .from(STORAGE_BUCKET)
-        .createSignedUrl(file.storage_path, 60);
-
-      if (signedUrlError) throw signedUrlError;
-      if (!signedUrlData?.signedUrl) throw new Error('Failed to generate download URL');
-
-      // Download the current file
-      const fileResponse = await fetch(signedUrlData.signedUrl);
-      if (!fileResponse.ok) throw new Error('Failed to download file');
-
-      const arrayBuffer = await fileResponse.arrayBuffer();
       const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
+      const worksheet = workbook.addWorksheet('Sheet1');
+      
+      worksheets[0].data.forEach((row, rowIndex) => {
+        const values = row.map(cell => cell.value);
+        worksheet.addRow(values);
+      });
 
-      // Convert to blob
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: file.type });
 
-      // Upload modified file back to storage
       const { error: uploadError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .update(file.storage_path, blob);
 
       if (uploadError) throw uploadError;
 
-      // Update processed status in database
       if (file) {
         const { error: updateError } = await supabase
           .from('files')
           .update({ 
             processed_at: new Date().toISOString(),
             processed_data: processedData,
-            last_modified: new Date().toISOString()
+            last_modified: new Date().toISOString(),
+            excel_data: worksheets[0].data,
+            excel_data_updated_at: new Date().toISOString(),
           })
           .eq('id', file.id);
 
         if (updateError) throw updateError;
+        setFile({
+          ...file,
+          // id: newData[0].id,
+          processed_at: new Date().toISOString(),
+          processed_data: processedData,
+          last_modified: new Date().toISOString(),
+          excel_data: worksheets[0].data,
+          excel_data_updated_at: new Date().toISOString()
+        });
       }
 
       setProcessSuccess(true);
-      setTimeout(() => setProcessSuccess(false), 3000); // Hide success message after 3 seconds
+      setTimeout(() => setProcessSuccess(false), 3000);
     } catch (err) {
       console.error('Processing error:', err);
       setError('Failed to process file. Please try again.');
     } finally {
       setProcessing(false);
-      setSaving(false);
+      setSavingProcess(false);
     }
   };
 
@@ -774,215 +712,146 @@ export const FileEdit: React.FC = () => {
     );
   }
 
-  // const handleConvertToExcel = async () => {
-  //   if (!file) return;
-    
-  //   try {
-  //     setConverting(true);
-  //     setError(null);
-      
-  //     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-  //       .from(STORAGE_BUCKET)
-  //       .createSignedUrl(file.storage_path, 3600);
-      
-  //     if (signedUrlError) throw signedUrlError;
-  //     if (!signedUrlData?.signedUrl) throw new Error('Failed to generate PDF URL');
-      
-  //     const response = await fetch('http://localhost:3000/api/process-pdf', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         pdfUrl: signedUrlData.signedUrl
-  //       })
-  //     });
-      
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       throw new Error(errorData.error || 'Failed to process PDF');
-  //     }
-
-  //     console.log(response)
-  //     // // Get the Excel file as a blob
-  //     // const blob = await response.blob();
-      
-  //     // // Create file name for the Excel file
-  //     // const excelFileName = file.filename.replace('.pdf', '.xlsx');
-  //     // const excelStoragePath = file.storage_path.replace('.pdf', '.xlsx');
-      
-  //     // // Upload the Excel file to Supabase storage
-  //     // const { error: uploadError } = await supabase.storage
-  //     //   .from(STORAGE_BUCKET)
-  //     //   .upload(excelStoragePath, blob, {
-  //     //     contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  //     //   });
-      
-  //     // if (uploadError) throw uploadError;
-      
-  //     // const { data: { publicUrl } } = supabase.storage
-  //     //   .from(STORAGE_BUCKET)
-  //     //   .getPublicUrl(excelStoragePath);
-      
-  //     // // Create a new file record in the database
-  //     // const { error: dbError } = await supabase
-  //     //   .from('files')
-  //     //   .insert({
-  //     //     filename: excelFileName,
-  //     //     size: blob.size,
-  //     //     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  //     //     url: publicUrl,
-  //     //     user_id: file.user_id,
-  //     //     storage_path: excelStoragePath,
-  //     //     category: 'excel'
-  //     //   });
-      
-  //     // if (dbError) throw dbError;
-      
-  //     // navigate('/');
-  //   } catch (err) {
-  //     console.error('Conversion error:', err);
-  //     setError(err instanceof Error ? err.message : 'Failed to convert file');
-  //   } finally {
-  //     setConverting(false);
-  //   }
-  // };
   const handleConvertToExcel = async () => {
-  if (!file) return;
+    if (!file) return;
 
-  try {
-    setConverting(true);
-    setError(null);
+    try {
+      setConverting(true);
+      setError(null);
 
-    // Step 1: Get signed URL for the PDF file
-    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .createSignedUrl(file.storage_path, 3600);
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .createSignedUrl(file.storage_path, 3600);
 
-    if (signedUrlError) throw signedUrlError;
-    if (!signedUrlData?.signedUrl) throw new Error('Failed to generate PDF URL');
+      if (signedUrlError) throw signedUrlError;
+      if (!signedUrlData?.signedUrl) throw new Error('Failed to generate PDF URL');
 
-    // Step 2: Send request to the backend to process PDF and extract data
-    const response = await fetch('http://localhost:3000/api/process-pdf', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        pdfUrl: signedUrlData.signedUrl,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to process PDF');
-    }
-
-    // Step 3: Process the extracted data
-    const extractedData = await response.json();
-
-    if (!Array.isArray(extractedData) || extractedData.length === 0) {
-      throw new Error('No data extracted from PDF');
-    }
-
-    // Step 4: Remove duplicate rows if necessary (e.g., by comparing row content)
-    const uniqueData = extractedData.filter((value, index, self) =>
-      index === self.findIndex((t) => (
-        t.join(',') === value.join(',')
-      ))
-    );
-
-    // Step 5: Create Excel workbook and add data
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Extracted Data');
-
-    uniqueData.forEach((row) => {
-      if (Array.isArray(row)) {
-        worksheet.addRow(row);
+      // Check if server is running before making request
+      try {
+        await fetch('http://localhost:3000');
+      } catch (err) {
+        throw new Error('Server is not running. Please start the server with "npm run server"');
       }
-    });
 
-    // Step 6: Generate Excel file and upload
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-    const excelFileName = file.filename.replace('.pdf', '.xlsx');
-    const excelStoragePath = file.storage_path.replace('.pdf', '.xlsx');
-
-    // Upload the Excel file to Supabase storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from(STORAGE_BUCKET)
-      .upload(excelStoragePath, blob, { upsert: true });
-
-    if (uploadError) throw uploadError;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from(STORAGE_BUCKET)
-      .getPublicUrl(excelStoragePath);
-
-    // Step 7: Insert record into database
-    const { error: dbError } = await supabase
-      .from('files')
-      .insert({
-        filename: excelFileName,
-        size: blob.size,
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        url: publicUrl,
-        user_id: file.user_id,
-        storage_path: excelStoragePath,
-        category: 'excel',
+      const response = await fetch('http://localhost:3000/api/process-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pdfUrl: signedUrlData.signedUrl,
+        }),
       });
 
-    if (dbError) throw dbError;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to process PDF');
+      }
 
-    // Parse and display the Excel file
-    const parsedWorksheets: WorksheetData[] = [];
-    const firstWorksheet = workbook.worksheets[0];
-    
-    // Process the worksheet data
-    const data: CellData[][] = [];
-    firstWorksheet.eachRow((row, rowNumber) => {
-      const rowData: CellData[] = [];
-      row.eachCell((cell, colNumber) => {
-        rowData.push({
-          value: cell.value?.toString() || '',
-          style: {
-            alignment: cell.alignment?.horizontal || 'left',
-            isBold: cell.font?.bold || false
-          }
+      const extractedData = await response.json();
+
+      if (!Array.isArray(extractedData) || extractedData.length === 0) {
+        throw new Error('No data extracted from PDF');
+      }
+
+      const uniqueData = extractedData.filter((value, index, self) =>
+        index === self.findIndex((t) => (
+          t.join(',') === value.join(',')
+        ))
+      );
+
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Extracted Data');
+
+      uniqueData.forEach((row) => {
+        if (Array.isArray(row)) {
+          worksheet.addRow(row);
+        }
+      });
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      const excelFileName = file.filename.replace('.pdf', '.xlsx');
+      const excelStoragePath = file.storage_path.replace('.pdf', '.xlsx');
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(excelStoragePath, blob, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(STORAGE_BUCKET)
+        .getPublicUrl(excelStoragePath);
+
+      const { data: newData, error: dbError } = await supabase
+        .from('files')
+        .insert({
+          filename: excelFileName,
+          size: blob.size,
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          url: publicUrl,
+          user_id: file.user_id,
+          storage_path: excelStoragePath,
+          category: 'excel',
+          is_converted_from_pdf: true,
+          converted_from_file_id: file.id
+        })  
+        .select('id') 
+        .single();
+
+        console.log("newData")
+        console.log(newData)
+
+      if (dbError) throw dbError;
+
+      const parsedWorksheets: WorksheetData[] = [];
+      const firstWorksheet = workbook.worksheets[0];
+      
+      const data: CellData[][] = [];
+      firstWorksheet.eachRow((row, rowNumber) => {
+        const rowData: CellData[] = [];
+        row.eachCell((cell, colNumber) => {
+          rowData.push({
+            value: cell.value?.toString() || '',
+            style: {
+              alignment: cell.alignment?.horizontal || 'left',
+              isBold: cell.font?.bold || false
+            }
+          });
         });
+        data.push(rowData);
       });
-      data.push(rowData);
-    });
 
-    parsedWorksheets.push({
-      name: firstWorksheet.name,
-      data,
-      merges: []
-    });
+      parsedWorksheets.push({
+        name: firstWorksheet.name,
+        data,
+        merges: []
+      });
 
-    // Update the UI with the new Excel data
-    setWorksheets(parsedWorksheets);
-    setFile({
-      ...file,
-      category: 'excel',
-      filename: excelFileName,
-      storage_path: excelStoragePath,
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    });
-  } catch (err) {
-    console.error('Conversion error:', err);
-    setError(err instanceof Error ? err.message : 'Failed to convert file');
-  } finally {
-    setConverting(false);
-  }
-};
+      setWorksheets(parsedWorksheets);
+      setFile({
+        ...file,
+        id:newData.id,
+        category: 'excel',
+        filename: excelFileName,
+        storage_path: excelStoragePath,
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+    } catch (err) {
+      console.error('Conversion error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to convert file');
+    } finally {
+      setConverting(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <div className="flex items-center gap-4 mb-6">
         <button
-          onClick={() => navigate('/')}
+          onClick={() => navigate(file.category === 'excel' ? '/upload-excel' : '/upload-pdf')}
           className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -1010,7 +879,7 @@ export const FileEdit: React.FC = () => {
                 <iframe
                   src={pdfUrl}
                   className="w-full h-full border-0" 
-                  sandbox="allow-forms allow-scripts allow-same-origin"
+                  //sandbox="allow-forms allow-scripts allow-same-origin"
                   title="PDF Preview"
                 />
               ) : (
@@ -1040,12 +909,13 @@ export const FileEdit: React.FC = () => {
                     className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors mr-2"
                   >
                     <LayoutTemplate className="w-4 h-4" />
-                    {saving ? 'Reformatting...' : 'Reformat'}
+                     {savingReformat ? 'Reformatting...' : 'Reformat'}
                   </button>
                   <button
                     onClick={handleProcess}
-                    disabled={processing}
-                    className="flex items-center gap-2 px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-green-300 transition-colors"
+                    disabled={!hasReformatted || processing || savingProcess}
+                    title={!hasReformatted ? "Please reformat the file before processing" : undefined}
+                    className="flex items-center gap-2 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
                   >
                     <Play className="w-4 h-4" />
                     {processing ? 'Processing...' : 'Process'}
@@ -1061,7 +931,7 @@ export const FileEdit: React.FC = () => {
                   <table className="w-full border-collapse">
                     <thead className="sticky top-0 bg-white shadow-sm z-10">
                       <tr>
-                        {sheet.data[0]?.map((cell, colIndex) => !cell.isHidden && (
+                        {sheet.data[0]?.map((cell, colIndex) => cell && !cell.isHidden && (
                           <th
                             key={`${sheetIndex}-header-${colIndex}`}
                             style={{
@@ -1080,13 +950,12 @@ export const FileEdit: React.FC = () => {
                     </thead>
                     <tbody>
                       {sheet.data.slice(1).map((row, rowIndex) => {
-                        // Check if row has any visible cells
                         const hasVisibleCells = row.some(cell => !cell.isHidden);
                         if (!hasVisibleCells) return null;
                         
                         return (
                         <tr key={`${sheetIndex}-row-${rowIndex + 1}`}>
-                          {row.map((cell, colIndex) => !cell.isHidden && (
+                          {row.map((cell, colIndex) => cell && !cell.isHidden && (
                             <td
                               key={`${sheetIndex}-${rowIndex + 1}-${colIndex}`}
                               style={getCellStyle(cell)}
@@ -1168,3 +1037,5 @@ export const FileEdit: React.FC = () => {
     </div>
   );
 };
+
+export { FileEdit }

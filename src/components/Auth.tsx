@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { LogIn, UserPlus, AlertCircle } from 'lucide-react';
+import { LogIn, UserPlus, AlertCircle, ArrowLeftRight } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 export const Auth: React.FC = () => {
@@ -7,13 +8,17 @@ export const Auth: React.FC = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [mode, setMode] = useState<'signin' | 'signup'>(
+    location.state?.mode || 'signin'
+  );
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+  
     try {
       if (mode === 'signup') {
         const { error } = await supabase.auth.signUp({
@@ -37,7 +42,22 @@ export const Auth: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+    <div className="min-h-screen flex flex-col">
+      <nav className="bg-white shadow-sm relative z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
+              <ArrowLeftRight className="w-8 h-8 text-blue-600" />
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                conv3rt
+              </span>
+            </div>
+          </div>
+        </div>
+      </nav>
+      
+      <div className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-center mb-6">
         {mode === 'signin' ? 'Sign In' : 'Create Account'}
       </h2>
@@ -97,6 +117,8 @@ export const Auth: React.FC = () => {
           {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
         </button>
       </form>
+        </div>
+      </div>
     </div>
   );
 };
