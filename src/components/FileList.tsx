@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { FileText, Download, Trash2, AlertCircle, PencilLine } from 'lucide-react';
+import { FileText, FileSpreadsheet, Download, Trash2, AlertCircle, PencilLine } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, STORAGE_BUCKET } from '../lib/supabase';
 import type { FileRecord } from '../types/files';
@@ -79,6 +79,16 @@ export const FileList: React.FC<FileListProps> = ({ files, setFiles, category, t
         throw new Error('Invalid storage path');
       }
 
+      // First delete any converted files that reference this file
+      if (file.category === 'pdf') {
+        const { error: convertedFilesError } = await supabase
+          .from('files')
+          .delete()
+          .eq('converted_from_file_id', id);
+
+        if (convertedFilesError) throw convertedFilesError;
+      }
+
       const { error: storageError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .remove([file.storage_path]);
@@ -126,7 +136,7 @@ export const FileList: React.FC<FileListProps> = ({ files, setFiles, category, t
       <h2 className="text-xl font-semibold mb-4">{title}</h2>
       
       {downloadError && (
-        <div className="mb-4 p-3 bg-red-100 rounded-lg flex items-center gap-2 text-red-700">
+        <div className="mb-4 p-4 bg-red-50 border border-red-100 rounded-lg flex items-center gap-2 text-red-700">
           <AlertCircle className="w-4 h-4" />
           <p className="text-sm">{downloadError}</p>
         </div>
@@ -139,12 +149,23 @@ export const FileList: React.FC<FileListProps> = ({ files, setFiles, category, t
           files.map((file) => (
             <div
               key={file.id}
-              className="bg-white p-4 rounded-lg shadow-sm flex items-center justify-between"
+              className="bg-white p-4 rounded-lg border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow transition-all duration-200 flex items-center justify-between"
             >
               <div className="flex items-center space-x-3">
-                <FileText className="w-5 h-5 text-gray-400" />
+                {file.category === 'pdf' ? (
+                  <FileText className="w-5 h-5 text-red-600" />
+                ) : (
+                  <FileSpreadsheet className="w-5 h-5 text-green-600" />
+                )}
                 <div>
-                  <p className="font-medium">{file.filename}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium">{file.filename}</p>
+                    {file.is_converted_from_pdf && (
+                      <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full">
+                        Converted from PDF
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-500">
                     {format(new Date(file.created_at), 'PPp')} •{' '}
                     {(file.size / 1024).toFixed(1)} KB
@@ -154,21 +175,21 @@ export const FileList: React.FC<FileListProps> = ({ files, setFiles, category, t
               <div className="flex space-x-2">
                 <button
                   onClick={() => handleEdit(file.id)}
-                  className="p-2 text-blue-600 hover:text-blue-900 rounded-full hover:bg-blue-50 transition-colors"
+                  className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100 transition-all duration-200"
                   title="Edit file"
                 >
                   <PencilLine className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => handleDownload(file)}
-                  className="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors"
+                  className="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-all duration-200"
                   title="Download file"
                 >
                   <Download className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => handleDelete(file.id, file)}
-                  className="p-2 text-red-600 hover:text-red-900 rounded-full hover:bg-red-50 transition-colors"
+                  className="p-2 text-gray-600 hover:text-gray-800 rounded-full hover:bg-gray-100 transition-all duration-200"
                   title="Delete file"
                 >
                   <Trash2 className="w-5 h-5" />

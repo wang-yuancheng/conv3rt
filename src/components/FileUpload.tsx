@@ -17,7 +17,7 @@ interface UploadProgressProps {
 const UploadProgress: React.FC<UploadProgressProps> = ({ progress }) => (
   <div className="w-full bg-gray-200 rounded-full h-2.5">
     <div
-      className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+      className="bg-green-600 h-2.5 rounded-full transition-all duration-300"
       style={{ width: `${progress}%` }}
     ></div>
   </div>
@@ -153,9 +153,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
             <p className="mb-2 text-sm text-gray-500">
               <span className="font-semibold">Click to upload</span> or drag and drop
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 mb-1">
               Excel files only (.xls, .xlsx) • Max 10MB
             </p>
+            <p className="text-[10px] text-gray-400">Please ensure Excel files contain only one sheet</p>
           </div>
           <input
             ref={fileInputRef}
@@ -177,7 +178,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUploaded }) => {
           <button
             onClick={handleUpload}
             disabled={uploading}
-            className="w-full mt-4 px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-blue-300"
+            className="w-full mt-4 px-4 py-2 text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-green-300"
           >
             {uploading ? 'Uploading...' : 'Upload File'}
           </button>
