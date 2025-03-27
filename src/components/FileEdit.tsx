@@ -76,6 +76,11 @@ const FileEdit: React.FC = () => {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [converting, setConverting] = useState(false);
   const [hasAccountType, setHasAccountType] = useState(false);
+  const [backendUrl] = useState(
+    import.meta.env.MODE === 'development' 
+      ? 'http://localhost:3000'
+      : 'https://conv3rt-backend.onrender.com'
+  );
 
   const loadProcessedData = async (fileData: FileRecord) => {
     if (!fileData.processed_data || !Array.isArray(fileData.processed_data)) return;
@@ -413,9 +418,9 @@ const FileEdit: React.FC = () => {
       'Account': 'Account Description',
       'Debit': 'Debit Amount',
       'Credit': 'Credit Amount',
-      'Type': 'Account Type' 
+      'Type': 'Account Type',
     };
-    const headerIndicators = ['Account Code', 'Account', 'Account Type', 'Debit - Year to date'];
+    const headerIndicators = ['Account Code', 'Account', 'Account Type', 'Debit - Year to date', 'Debit', 'Credit'];
   
     try {
       // setSaving(true);
@@ -460,9 +465,19 @@ const FileEdit: React.FC = () => {
       
         // 原始表头
         const origHeader = sheet.data[start] || [];
-        const headerTexts = origHeader.map(cell => 
-          cell.value?.toString().trim().toLowerCase() || ''
-        );
+        let headerTexts = origHeader.map(cell => 
+  cell.value?.toString().trim().toLowerCase() || ''
+);
+
+// Special‑case QuickBooks: blank first header + “Debit” + “Credit”
+if (
+  headerTexts[0] === '' &&
+  headerTexts[1]?.includes('debit') &&
+  headerTexts[2]?.includes('credit')
+) {
+  headerTexts[0] = 'account'; // pretend the first column is “Account”
+}
+
 
         // 检查是否存在Account Type或Type列
       const hasAccountType = headerTexts.some(h => 
@@ -528,7 +543,14 @@ const FileEdit: React.FC = () => {
               filtered.splice(4, 0, ...emptyColumns);
               return filtered;
             })
-            .filter(row => row[0]?.value?.toString().trim().length > 0)
+            .filter(row => {
+  const first = row[0]?.value?.toString().trim() || '';
+  // Drop blank, “Total”, or date rows
+  if (!first) return false;
+  if (/^total$/i.test(first)) return false;
+  if (/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i.test(first)) return false;
+  return true;
+})
         };
       });
       if (updateError) throw updateError;
@@ -569,7 +591,7 @@ const FileEdit: React.FC = () => {
           .filter(row => row.length > 0) // Remove empty rows
       }));
 
-      const response = await fetch('http://localhost:3000/api/process', {
+      const response = await fetch(`${backendUrl}/api/process`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -726,14 +748,7 @@ const FileEdit: React.FC = () => {
       if (signedUrlError) throw signedUrlError;
       if (!signedUrlData?.signedUrl) throw new Error('Failed to generate PDF URL');
 
-      // Check if server is running before making request
-      try {
-        await fetch('http://localhost:3000');
-      } catch (err) {
-        throw new Error('Server is not running. Please start the server with "npm run server"');
-      }
-
-      const response = await fetch('http://localhost:3000/api/process-pdf', {
+      const response = await fetch(`${backendUrl}/api/process-pdf`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
