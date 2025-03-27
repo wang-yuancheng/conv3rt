@@ -16,7 +16,7 @@ const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 3000;
 const CLIENT_URL = process.env.NODE_ENV === 'production' 
   ? 'https://conv3rt.netlify.app'
-  : 'http://localhost:5173';
+  : ['http://localhost:5173', 'http://localhost:3000'];
 
 const sample_response = `Revenue/Income, Revenue, Sales of trading goods, Wholesale Trade - Others  
 Revenue/Income, Other Income, Other Income  
@@ -85,7 +85,7 @@ const port = process.env.PORT || 3000;
 
 // Configure CORS
 app.use(cors({
-  origin: [CLIENT_URL],
+  origin: Array.isArray(CLIENT_URL) ? CLIENT_URL : [CLIENT_URL],
   methods: ['POST'],
   allowedHeaders: ['Content-Type']
 }));
