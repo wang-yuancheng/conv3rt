@@ -1,5 +1,7 @@
 # Conv3rt - Financial Statement Standardizer
+![Picture](cropped_conv3rt.png)
 
+# Introduction
 Conv3rt is an AI-powered web application designed to automate the mapping and conversion of trial balances from various formats into a standardized schema. Moreover, by reducing manual cleanup and classification of accounts, Conv3rt helps accountants onboard new companies quickly and accurately.
 
 ## Hackathon Recognition
