@@ -428,7 +428,7 @@ const FileEdit: React.FC = () => {
       setError('');
       setHasReformatted(true);
   
-      // 1️⃣ 更新 DB 状态
+      // Update database status
       const { error: updateError } = await supabase
         .from('files')
         .update({ reformatted: true, reformatted_at: new Date().toISOString() })
@@ -440,7 +440,7 @@ const FileEdit: React.FC = () => {
           reformatted_at: new Date().toISOString() 
         });
         
-      // 2️⃣ 下载 Excel
+      // download excel
       const { data: signedUrlData, error: signedUrlError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .createSignedUrl(file.storage_path, 60);
@@ -454,7 +454,6 @@ const FileEdit: React.FC = () => {
       console.log(JSON.stringify(worksheets,null,2));
 
       const newWorksheets = worksheets.map(sheet => {
-        // 找到数据起始（表头）行
         const headerIndex = sheet.data.findIndex(row =>
           row.some(cell =>
             typeof cell.value === 'string' &&
@@ -463,7 +462,6 @@ const FileEdit: React.FC = () => {
         );
         const start = headerIndex === -1 ? 0 : headerIndex;
       
-        // 原始表头
         const origHeader = sheet.data[start] || [];
         let headerTexts = origHeader.map(cell => 
   cell.value?.toString().trim().toLowerCase() || ''
@@ -479,7 +477,6 @@ if (
 }
 
 
-        // 检查是否存在Account Type或Type列
       const hasAccountType = headerTexts.some(h => 
         h === 'account type' || h === 'type'
       );
@@ -489,20 +486,16 @@ if (
 
         const keys = Object.keys(headerMappings);
 
-        // 根据 headerMappings 顺序获取对应列索引（三级匹配）
         const colIndices = keys.map(key => {
           const lowerKey = key.toLowerCase();
           const mappedValue = headerMappings[key].toLowerCase();
 
-          // 1️⃣ 完全匹配 mapping value（例如 "Account Description"）
           let idx = headerTexts.findIndex(h => h === mappedValue);
           if (idx >= 0) return idx;
 
-          // 2️⃣ 完全匹配 mapping key（例如 "Account"）
           idx = headerTexts.findIndex(h => h === lowerKey);
           if (idx >= 0) return idx;
 
-          // 3️⃣ 包含 mapping key（例如 "Account Name"）
           return headerTexts.findIndex(h => h.includes(lowerKey));
         });
 
@@ -511,18 +504,15 @@ if (
           data: sheet.data
             .slice(start)
             .map((row, rowIndex) => {
-              // 仅保留 headerMappings 定义的列
               const filtered = colIndices.map(i =>
                 i >= 0 && row[i] ? row[i] : { value: '', style: {} }
               );
       
               if (rowIndex === 0) {
-                // 表头行：替换名称并插入分类列
                 const header = keys.map(key => ({
                   value: headerMappings[key],
                   style: {}
                 }));
-                // 动态插入列
               const insertColumns = [];
               insertColumns.push(
                 { value: 'Primary Classification', style: {} },
@@ -607,12 +597,8 @@ if (
       
       if (!Array.isArray(processedData) || processedData.length === 0) throw new Error('Invalid response from server');
     
+    const accountTypeColumnIndex = 4;
 
-    // 检查Account Type列是否有数据
-    const accountTypeColumnIndex = 4; // 根据实际列位置调整
-
-
-    // 填充逻辑
     const promises = [];
     const classifications = processedData.map(row => ({
       accountType: row[1] || '',
@@ -622,7 +608,6 @@ if (
     }));
     
     if (!hasAccountType) {
-      // 如果没有 accountType，则填充 accountType 到 accountTypeColumnIndex - 1
       promises.push(fillColumnWithValues(accountTypeColumnIndex - 1, classifications.map(c => c.accountType)));
     }
     
